@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s --path-as-is -o /tmp/bundle.js -w \"iOS bundle: HTTP_STATUS:%{http_code} SIZE:%{size_download}\\\\n\" \"http://localhost:8085/node_modules/expo-router/entry.bundle?platform=ios&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.bytecode=true&transform.routerRoot=app\" --max-time 180)",
+      "Bash(curl -s --path-as-is -o /tmp/bundle-android.js -w \"Android bundle: HTTP_STATUS:%{http_code} SIZE:%{size_download}\\\\n\" \"http://localhost:8085/node_modules/expo-router/entry.bundle?platform=android&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.bytecode=true&transform.routerRoot=app\" --max-time 180)",
+      "Bash(rm -f /tmp/expo-video-install.log)",
+      "Bash(npx expo *)",
+      "Bash(echo \"INSTALL_EXIT:$?\")"
+    ]
+  }
+}

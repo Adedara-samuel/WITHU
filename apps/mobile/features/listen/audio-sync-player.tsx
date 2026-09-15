@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Text, View } from "react-native";
-import { Audio, type AVPlaybackStatus } from "expo-av";
+import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { Music, Pause, Play } from "lucide-react-native";
 import { needsResync } from "@withu/shared-utils";
 import type { ListenSession } from "@withu/shared-types";
@@ -13,58 +13,33 @@ interface Props {
 }
 
 export function AudioSyncPlayer({ session, onPlay, onPause }: Props) {
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const player = useAudioPlayer(session.track.trackId);
+  const status = useAudioPlayerStatus(player);
   const suppress = useRef(false);
   const wasPlaying = useRef(false);
-  const [ready, setReady] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
 
+  // Report play/pause transitions only - useAudioPlayerStatus ticks on every
+  // updateInterval, so we must not treat every tick as a fresh play event.
   useEffect(() => {
-    let mounted = true;
-    Audio.Sound.createAsync({ uri: session.track.trackId }, { shouldPlay: false }, (status) => handleStatus(status)).then(
-      ({ sound }) => {
-        if (!mounted) return sound.unloadAsync();
-        soundRef.current = sound;
-        setReady(true);
-      }
-    );
-    return () => {
-      mounted = false;
-      soundRef.current?.unloadAsync();
-    };
+    if (suppress.current || status.playing === wasPlaying.current) return;
+    wasPlaying.current = status.playing;
+    if (status.playing) onPlay(status.currentTime);
+    else onPause(status.currentTime);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session.track.trackId]);
-
-  const handleStatus = (status: AVPlaybackStatus) => {
-    if (suppress.current || !status.isLoaded) return;
-    if (status.isPlaying !== wasPlaying.current) {
-      wasPlaying.current = status.isPlaying;
-      setIsPlaying(status.isPlaying);
-      const seconds = status.positionMillis / 1000;
-      if (status.isPlaying) onPlay(seconds);
-      else onPause(seconds);
-    }
-  };
+  }, [status.playing]);
 
   useEffect(() => {
-    const sound = soundRef.current;
-    if (!sound || !ready) return;
     const elapsed = session.playing ? (Date.now() - new Date(session.lastSyncedAt).getTime()) / 1000 : 0;
     const authoritative = session.currentPositionSeconds + Math.max(0, elapsed);
 
-    (async () => {
-      suppress.current = true;
-      const status = await sound.getStatusAsync();
-      const localSeconds = status.isLoaded ? status.positionMillis / 1000 : 0;
-      if (needsResync(localSeconds, authoritative)) await sound.setPositionAsync(authoritative * 1000);
-      if (session.playing) await sound.playAsync();
-      else await sound.pauseAsync();
-      wasPlaying.current = session.playing;
-      setIsPlaying(session.playing);
-      setTimeout(() => (suppress.current = false), 200);
-    })();
+    suppress.current = true;
+    if (needsResync(player.currentTime, authoritative)) player.seekTo(authoritative);
+    if (session.playing) player.play();
+    else player.pause();
+    wasPlaying.current = session.playing;
+    setTimeout(() => (suppress.current = false), 200);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, session.playing, session.currentPositionSeconds, session.lastSyncedAt]);
+  }, [player, session.playing, session.currentPositionSeconds, session.lastSyncedAt]);
 
   return (
     <View className="items-center gap-4 rounded-2xl border border-border bg-card p-8">
@@ -75,18 +50,9 @@ export function AudioSyncPlayer({ session, onPlay, onPause }: Props) {
         <Text className="font-display text-lg text-foreground">{session.track.title}</Text>
         {session.track.artist && <Text className="text-sm text-muted-foreground">{session.track.artist}</Text>}
       </View>
-      <Button
-        size="lg"
-        onPress={async () => {
-          const sound = soundRef.current;
-          if (!sound) return;
-          const status = await sound.getStatusAsync();
-          if (status.isLoaded && status.isPlaying) await sound.pauseAsync();
-          else await sound.playAsync();
-        }}
-      >
-        {isPlaying ? <Pause size={18} color="#fff" /> : <Play size={18} color="#fff" />}
-        <Text className="text-sm font-sans-medium text-primary-foreground">{isPlaying ? "Pause" : "Play"}</Text>
+      <Button size="lg" onPress={() => (status.playing ? player.pause() : player.play())}>
+        {status.playing ? <Pause size={18} color="#fff" /> : <Play size={18} color="#fff" />}
+        <Text className="text-sm font-sans-medium text-primary-foreground">{status.playing ? "Pause" : "Play"}</Text>
       </Button>
     </View>
   );
