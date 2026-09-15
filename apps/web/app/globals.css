@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Fraunces", Georgia, serif;
+  --radius: 1rem;
+
+  --background: 30 33% 97%;
+  --foreground: 330 20% 12%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 330 20% 12%;
+
+  --muted: 30 20% 93%;
+  --muted-foreground: 330 8% 42%;
+
+  --border: 30 20% 88%;
+  --input: 30 20% 88%;
+  --ring: 336 45% 40%;
+
+  --primary: 336 45% 32%;
+  --primary-foreground: 30 40% 98%;
+
+  --secondary: 25 35% 90%;
+  --secondary-foreground: 336 45% 24%;
+
+  --accent: 38 55% 52%;
+  --accent-foreground: 30 45% 12%;
+
+  --ember: 12 65% 55%;
+  --ember-foreground: 30 45% 98%;
+
+  --destructive: 4 70% 50%;
+  --destructive-foreground: 30 40% 98%;
+}
+
+.dark {
+  --background: 330 22% 8%;
+  --foreground: 30 30% 95%;
+
+  --card: 330 20% 11%;
+  --card-foreground: 30 30% 95%;
+
+  --muted: 330 15% 16%;
+  --muted-foreground: 30 12% 65%;
+
+  --border: 330 15% 20%;
+  --input: 330 15% 20%;
+  --ring: 336 55% 60%;
+
+  --primary: 336 55% 62%;
+  --primary-foreground: 330 25% 10%;
+
+  --secondary: 330 15% 18%;
+  --secondary-foreground: 30 30% 92%;
+
+  --accent: 38 60% 58%;
+  --accent-foreground: 330 25% 10%;
+
+  --ember: 12 70% 62%;
+  --ember-foreground: 330 25% 10%;
+
+  --destructive: 4 70% 55%;
+  --destructive-foreground: 30 30% 95%;
+}
+
+* {
+  @apply border-border;
+}
+
+html {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-background text-foreground antialiased;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.glass {
+  @apply bg-card/70 backdrop-blur-xl border border-border/60;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded-full;
+}

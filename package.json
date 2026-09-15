@@ -1,0 +1,23 @@
+{
+  "name": "withu",
+  "private": true,
+  "version": "0.1.0",
+  "description": "WITHU - a private digital space for two people who are apart",
+  "scripts": {
+    "dev:api": "pnpm --filter @withu/api dev",
+    "dev:web": "pnpm --filter @withu/web dev",
+    "dev:mobile": "pnpm --filter @withu/mobile start",
+    "build": "pnpm --filter \"./packages/**\" build && pnpm --filter @withu/api build && pnpm --filter @withu/web build",
+    "seed": "pnpm --filter @withu/api seed",
+    "test": "pnpm -r --if-present test",
+    "lint": "pnpm -r --if-present lint",
+    "typecheck": "pnpm -r --if-present typecheck"
+  },
+  "devDependencies": {
+    "typescript": "5.5.4"
+  },
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "packageManager": "pnpm@9.1.0"
+}
