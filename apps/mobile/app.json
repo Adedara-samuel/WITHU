@@ -14,21 +14,33 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.withu.mobile"
+      "bundleIdentifier": "app.withu.mobile",
+      "infoPlist": {
+        "NSCameraUsageDescription": "WITHU needs camera access for video calls with your partner.",
+        "NSMicrophoneUsageDescription": "WITHU needs microphone access for audio and video calls with your partner."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0d1710"
       },
-      "package": "app.withu.mobile"
+      "package": "app.withu.mobile",
+      "permissions": ["CAMERA", "RECORD_AUDIO", "MODIFY_AUDIO_SETTINGS"]
     },
     "plugins": [
       "expo-router",
       "expo-secure-store",
       "expo-font",
       "expo-splash-screen",
-      "expo-status-bar"
+      "expo-status-bar",
+      [
+        "@config-plugins/react-native-webrtc",
+        {
+          "cameraPermissionText": "WITHU needs camera access for video calls with your partner.",
+          "microphonePermissionText": "WITHU needs microphone access for calls with your partner."
+        }
+      ]
     ],
     "extra": {
       "apiUrl": "http://localhost:4000"

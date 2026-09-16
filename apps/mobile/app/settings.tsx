@@ -3,14 +3,91 @@ import { router } from "expo-router";
 import { Alert, Pressable, ScrollView, Switch, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeft, LogOut } from "lucide-react-native";
+import type { UseMutationResult } from "@tanstack/react-query";
+import type { Couple } from "@withu/shared-types";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PickerButton } from "@/components/ui/picker-modal";
 import { useLogout } from "@/features/auth/hooks";
-import { useLeaveCouple, useMyCouple, useUpdateCouple } from "@/features/couple/hooks";
+import { useCancelLeaveRequest, useMyCouple, useRequestLeaveCouple, useUpdateCouple } from "@/features/couple/hooks";
 import { useUpdatePreferences, useUpdateProfile } from "@/features/profile/hooks";
 import { useAuthStore } from "@/stores/auth-store";
+
+function LeaveRelationshipControl({
+  couple,
+  userId,
+  requestLeave,
+  cancelLeave,
+}: {
+  couple: Couple;
+  userId: string;
+  requestLeave: UseMutationResult<{ dissolved: boolean; coupleId: string; partnerId: string | null }, unknown, void>;
+  cancelLeave: UseMutationResult<{ cancelled: boolean }, unknown, void>;
+}) {
+  const iRequested = couple.pendingLeaveRequestedBy.includes(userId);
+  const partnerRequested = couple.pendingLeaveRequestedBy.some((id) => id !== userId);
+
+  const confirmAndLeave = () =>
+    requestLeave.mutate(undefined, {
+      onSuccess: (result) => {
+        if (result.dissolved) router.replace("/onboarding/couple");
+      },
+    });
+
+  if (partnerRequested) {
+    const partnerName = couple.partnerOne.id !== userId ? couple.partnerOne.name : couple.partnerTwo?.name;
+    return (
+      <View className="gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3">
+        <Text className="text-sm font-sans-medium text-foreground">
+          {partnerName ?? "Your partner"} wants to end this relationship space.
+        </Text>
+        <Text className="text-xs text-muted-foreground">
+          Nothing happens unless you also agree. Confirm to close the space for both of you, or stay together.
+        </Text>
+        <View className="flex-row gap-2">
+          <Button variant="outline" onPress={() => cancelLeave.mutate()} loading={cancelLeave.isPending} className="flex-1">
+            Stay together
+          </Button>
+          <Button variant="destructive" onPress={confirmAndLeave} loading={requestLeave.isPending} className="flex-1">
+            Confirm & leave
+          </Button>
+        </View>
+      </View>
+    );
+  }
+
+  if (iRequested) {
+    return (
+      <View className="gap-2 rounded-xl border border-border bg-muted/30 p-3">
+        <Text className="text-sm font-sans-medium text-foreground">You asked to leave this relationship space.</Text>
+        <Text className="text-xs text-muted-foreground">Waiting for your partner to confirm - nothing has been deleted yet.</Text>
+        <Button variant="outline" onPress={() => cancelLeave.mutate()} loading={cancelLeave.isPending}>
+          Cancel my request
+        </Button>
+      </View>
+    );
+  }
+
+  return (
+    <Button
+      variant="destructive"
+      onPress={() =>
+        Alert.alert(
+          "Leave relationship space?",
+          "Your partner will need to confirm too before anything is deleted.",
+          [
+            { text: "Cancel", style: "cancel" },
+            { text: "Ask to leave", style: "destructive", onPress: confirmAndLeave },
+          ]
+        )
+      }
+      loading={requestLeave.isPending}
+    >
+      Leave relationship space
+    </Button>
+  );
+}
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -39,7 +116,8 @@ export default function SettingsScreen() {
   const updateProfile = useUpdateProfile();
   const updateCouple = useUpdateCouple();
   const updatePreferences = useUpdatePreferences();
-  const leaveCouple = useLeaveCouple();
+  const requestLeave = useRequestLeaveCouple();
+  const cancelLeave = useCancelLeaveRequest();
   const logout = useLogout();
 
   const [name, setName] = useState(user?.name ?? "");
@@ -91,21 +169,12 @@ export default function SettingsScreen() {
                 updateCouple.mutate({ settings: { privacy: { shareLastSeen: couple.settings.privacy.shareLastSeen, shareMood: checked } } })
               }
             />
-            <Button
-              variant="destructive"
-              onPress={() =>
-                Alert.alert("Leave relationship space?", "This will end your shared space for both of you.", [
-                  { text: "Cancel", style: "cancel" },
-                  {
-                    text: "Leave",
-                    style: "destructive",
-                    onPress: () => leaveCouple.mutate(undefined, { onSuccess: () => router.replace("/onboarding/couple") }),
-                  },
-                ])
-              }
-            >
-              Leave relationship space
-            </Button>
+            <LeaveRelationshipControl
+              couple={couple}
+              userId={user.id}
+              requestLeave={requestLeave}
+              cancelLeave={cancelLeave}
+            />
           </Section>
         )}
 

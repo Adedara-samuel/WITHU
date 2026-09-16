@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { moodEmoji } from "@withu/constants";
-import { Loader2, Send } from "lucide-react";
+import { Loader2, Phone, Send, Video } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PresenceDot } from "@/components/ui/presence-dot";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { ChatBubble } from "@/features/messages/components/chat-bubble";
 import { useMessages, useMessagesRealtime, useSendMessage, useTypingEmitter } from "@/features/messages/hooks";
 import { useAppSocket } from "@/providers/socket-provider";
 import { useAuthStore } from "@/stores/auth-store";
+import { useCall } from "@/features/calls/call-context";
 
 export default function ChatPage() {
   const user = useAuthStore((s) => s.user);
@@ -20,6 +21,7 @@ export default function ChatPage() {
   const { socket } = useAppSocket();
   const { partnerTyping } = useMessagesRealtime(couple?.id);
   const emitTyping = useTypingEmitter(couple?.id);
+  const { startCall, state: callState } = useCall();
 
   const [draft, setDraft] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -64,6 +66,26 @@ export default function ChatPage() {
               <p className="text-xs text-muted-foreground">
                 {partnerTyping ? "typing..." : partner.presence === "online" ? "Online" : moodEmoji(partner.mood) + " " + (partner.moodMessage ?? "")}
               </p>
+            </div>
+            <div className="ml-auto flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Start audio call"
+                disabled={callState.phase !== "idle"}
+                onClick={() => startCall("audio")}
+              >
+                <Phone className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Start video call"
+                disabled={callState.phase !== "idle"}
+                onClick={() => startCall("video")}
+              >
+                <Video className="h-4 w-4" />
+              </Button>
             </div>
           </>
         )}

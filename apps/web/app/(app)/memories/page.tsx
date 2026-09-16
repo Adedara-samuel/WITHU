@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatePresence } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CreateMemoryDialog } from "@/features/memories/components/create-memory-dialog";
@@ -37,9 +38,11 @@ export default function MemoriesPage() {
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {memories.map((m) => (
-                <MemoryCard key={m.id} memory={m} />
-              ))}
+              <AnimatePresence>
+                {memories.map((m) => (
+                  <MemoryCard key={m.id} memory={m} />
+                ))}
+              </AnimatePresence>
             </div>
           )}
         </TabsContent>

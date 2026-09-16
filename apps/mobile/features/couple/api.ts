@@ -6,7 +6,11 @@ export const coupleApi = {
   getMine: () => apiFetch<Couple>("/api/couples/me"),
   create: (input: CreateCoupleInput) => apiFetch<Couple>("/api/couples", { method: "POST", body: input }),
   update: (input: UpdateCoupleInput) => apiFetch<Couple>("/api/couples/me", { method: "PATCH", body: input }),
-  leave: () => apiFetch<{ left: boolean }>("/api/couples/leave", { method: "POST" }),
+  requestLeave: () =>
+    apiFetch<{ dissolved: boolean; coupleId: string; partnerId: string | null }>("/api/couples/leave/request", {
+      method: "POST",
+    }),
+  cancelLeave: () => apiFetch<{ cancelled: boolean }>("/api/couples/leave/cancel", { method: "POST" }),
   invite: (inviteeEmail?: string) =>
     apiFetch<CoupleInvitation>("/api/couples/invite", { method: "POST", body: { inviteeEmail } }),
   accept: (input: AcceptInvitationInput) => apiFetch<Couple>("/api/couples/accept", { method: "POST", body: input }),

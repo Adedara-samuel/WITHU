@@ -6,6 +6,7 @@ import type { Mood, UserStatus, PresenceState } from "./user";
 import type { WatchSession } from "./together";
 import type { ListenSession } from "./together";
 import type { AppNotification } from "./notification";
+import type { CallEndReason, CallKind, CallSignal } from "./call";
 
 /**
  * Every socket payload is intentionally tiny. We never send full documents
@@ -51,6 +52,16 @@ export interface ServerToClientEvents {
   LISTEN_STATE_UPDATED: (payload: { session: ListenSession }) => void;
   LISTEN_ENDED: (payload: { sessionId: string }) => void;
 
+  CALL_INCOMING: (payload: { callId: string; callerId: string; callerName: string; kind: CallKind }) => void;
+  CALL_ACCEPTED: (payload: { callId: string }) => void;
+  CALL_DECLINED: (payload: { callId: string }) => void;
+  CALL_ENDED: (payload: { callId: string; reason: CallEndReason }) => void;
+  CALL_SIGNAL: (payload: { callId: string; signal: CallSignal }) => void;
+
+  COUPLE_LEAVE_REQUESTED: (payload: { coupleId: string; requestedBy: string }) => void;
+  COUPLE_LEAVE_CANCELLED: (payload: { coupleId: string; cancelledBy: string }) => void;
+  COUPLE_DISSOLVED: (payload: { coupleId: string }) => void;
+
   MOOD_CHANGED: (payload: { userId: string; mood: Mood | null; moodMessage: string | null }) => void;
   STATUS_CHANGED: (payload: { userId: string; status: UserStatus | null }) => void;
 
@@ -88,6 +99,11 @@ export interface ClientToServerEvents {
 
   MOOD_SET: (payload: { mood: Mood | null; moodMessage: string | null }) => void;
   STATUS_SET: (payload: { status: UserStatus | null }) => void;
+
+  CALL_START: (payload: { callId: string; kind: CallKind }) => void;
+  CALL_RESPOND: (payload: { callId: string; accept: boolean }) => void;
+  CALL_SIGNAL: (payload: { callId: string; signal: CallSignal }) => void;
+  CALL_END: (payload: { callId: string }) => void;
 }
 
 export interface InterServerEvents {

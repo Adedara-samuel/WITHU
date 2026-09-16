@@ -13,6 +13,9 @@ export interface CoupleDoc {
       shareMood: boolean;
     };
   };
+  /** User ids who have asked to end the relationship. Both partners must request
+   * before the space is dissolved - this list is cleared if either side cancels. */
+  pendingLeaveRequestedBy: Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -32,6 +35,7 @@ const coupleSchema = new Schema<CoupleDoc>(
         shareMood: { type: Boolean, default: true },
       },
     },
+    pendingLeaveRequestedBy: [{ type: Schema.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true }
 );

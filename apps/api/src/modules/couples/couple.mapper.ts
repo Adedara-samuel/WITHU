@@ -15,6 +15,7 @@ export function toCouple(couple: CoupleHydrated, partnerOne: UserHydrated, partn
     partnerOne: toPublicUser(partnerOne, { shareLastSeen, shareMood }),
     partnerTwo: partnerTwo ? toPublicUser(partnerTwo, { shareLastSeen, shareMood }) : null,
     settings: couple.settings,
+    pendingLeaveRequestedBy: couple.pendingLeaveRequestedBy.map((id) => id.toString()),
     streakDays: relationshipStreakDays(couple.togetherSince.toISOString()),
     togetherSince: couple.togetherSince.toISOString(),
     createdAt: couple.createdAt.toISOString(),

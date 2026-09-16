@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Send } from "lucide-react-native";
+import { Phone, Send, Video } from "lucide-react-native";
 import { moodEmoji } from "@withu/constants";
 import type { Message } from "@withu/shared-types";
 import { Avatar } from "@/components/ui/avatar";
@@ -11,6 +11,7 @@ import { ChatBubble } from "@/features/messages/chat-bubble";
 import { useMessages, useMessagesRealtime, useSendMessage, useTypingEmitter } from "@/features/messages/hooks";
 import { useAppSocket } from "@/providers/socket-provider";
 import { useAuthStore } from "@/stores/auth-store";
+import { useCall } from "@/features/calls/call-context";
 
 export default function ChatScreen() {
   const user = useAuthStore((s) => s.user);
@@ -20,6 +21,7 @@ export default function ChatScreen() {
   const { socket } = useAppSocket();
   const { partnerTyping } = useMessagesRealtime(couple?.id);
   const emitTyping = useTypingEmitter(couple?.id);
+  const { startCall, state: callState } = useCall();
   const listRef = useRef<FlatList<Message>>(null);
   const [draft, setDraft] = useState("");
 
@@ -54,6 +56,24 @@ export default function ChatScreen() {
                 <Text className="text-xs text-muted-foreground">
                   {partnerTyping ? "typing..." : partner.presence === "online" ? "Online" : `${moodEmoji(partner.mood)} ${partner.moodMessage ?? ""}`}
                 </Text>
+              </View>
+              <View className="ml-auto flex-row gap-1">
+                <Pressable
+                  onPress={() => startCall("audio")}
+                  disabled={callState.phase !== "idle"}
+                  hitSlop={8}
+                  className="h-10 w-10 items-center justify-center rounded-full disabled:opacity-40"
+                >
+                  <Phone size={20} color="#221019" />
+                </Pressable>
+                <Pressable
+                  onPress={() => startCall("video")}
+                  disabled={callState.phase !== "idle"}
+                  hitSlop={8}
+                  className="h-10 w-10 items-center justify-center rounded-full disabled:opacity-40"
+                >
+                  <Video size={20} color="#221019" />
+                </Pressable>
               </View>
             </>
           )}

@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { Alert, Pressable, Text, View } from "react-native";
+import Animated, { FadeInUp } from "react-native-reanimated";
 import type { Message } from "@withu/shared-types";
 import { useAuthStore } from "@/stores/auth-store";
 import { useDeleteMessage, useToggleReaction } from "@/features/messages/hooks";
@@ -36,7 +37,7 @@ export function ChatBubble({ message }: { message: Message }) {
   };
 
   return (
-    <View className={cn("mb-3", isMine ? "items-end" : "items-start")}>
+    <Animated.View entering={FadeInUp.springify().damping(16)} className={cn("mb-3", isMine ? "items-end" : "items-start")}>
       <Pressable
         onPress={onPress}
         onLongPress={onLongPress}
@@ -59,6 +60,6 @@ export function ChatBubble({ message }: { message: Message }) {
           ))}
         </View>
       )}
-    </View>
+    </Animated.View>
   );
 }

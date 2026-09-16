@@ -11,6 +11,7 @@ import { registerAffectionHandlers } from "./affection";
 import { registerGameHandlers } from "./games";
 import { registerWatchHandlers } from "./watch";
 import { registerListenHandlers } from "./listen";
+import { registerCallHandlers } from "./calls";
 import type { TypedServer } from "./types";
 import { coupleRoom, userRoom } from "./types";
 
@@ -52,6 +53,7 @@ export function createSocketServer(httpServer: HttpServer): TypedServer {
     registerGameHandlers(socket);
     registerWatchHandlers(socket);
     registerListenHandlers(socket);
+    registerCallHandlers(socket);
 
     socket.on("PRESENCE_HEARTBEAT", () => {
       markUserOnline(userId, coupleId).catch(() => undefined);

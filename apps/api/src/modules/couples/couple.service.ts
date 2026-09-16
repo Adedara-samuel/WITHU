@@ -25,6 +25,17 @@ export function assertCoupleMember(couple: CoupleHydrated, userId: string) {
   if (!isMember) throw AppError.forbidden("You're not part of this relationship space");
 }
 
+/** Looks up the other person in a couple, e.g. to route a call directly to them. */
+export async function getPartnerId(coupleId: string, userId: string): Promise<string | null> {
+  const couple = await CoupleModel.findById(coupleId).select("partnerOneId partnerTwoId");
+  if (!couple) return null;
+  const partnerOneId = couple.partnerOneId.toString();
+  const partnerTwoId = couple.partnerTwoId?.toString() ?? null;
+  if (partnerOneId === userId) return partnerTwoId;
+  if (partnerTwoId === userId) return partnerOneId;
+  return null;
+}
+
 export async function createCouple(userId: string, input: CreateCoupleInput) {
   const user = await UserModel.findById(userId);
   if (!user) throw AppError.notFound("User not found");
@@ -135,11 +146,71 @@ export async function updateCoupleSettings(userId: string, input: UpdateCoupleIn
   return getCoupleWithPartners(couple._id.toString());
 }
 
-export async function leaveCouple(userId: string) {
+function otherPartnerId(couple: CoupleHydrated, userId: string): string | null {
+  const partnerOneId = couple.partnerOneId.toString();
+  const partnerTwoId = couple.partnerTwoId?.toString() ?? null;
+  if (partnerOneId === userId) return partnerTwoId;
+  if (partnerTwoId === userId) return partnerOneId;
+  return null;
+}
+
+/**
+ * Leaving is a mutual-consent action: the first request just records intent
+ * and notifies the other partner. The space is only dissolved once BOTH
+ * partners (when there are two) have requested to leave.
+ */
+export async function requestLeaveCouple(userId: string) {
   const user = await UserModel.findById(userId);
   if (!user?.coupleId) throw AppError.forbidden("You're not part of a relationship space");
-  const coupleId = user.coupleId;
 
-  await UserModel.updateMany({ coupleId }, { coupleId: null });
-  await CoupleModel.findByIdAndDelete(coupleId);
+  const couple = await CoupleModel.findById(user.coupleId);
+  if (!couple) throw AppError.notFound("Relationship space not found");
+  assertCoupleMember(couple, userId);
+
+  const partnerId = otherPartnerId(couple, userId);
+  const alreadyRequested = couple.pendingLeaveRequestedBy.some((id) => id.toString() === userId);
+
+  // Solo space (no partner yet) or partner already asked to leave -> dissolve immediately.
+  const partnerAlreadyRequested = partnerId
+    ? couple.pendingLeaveRequestedBy.some((id) => id.toString() === partnerId)
+    : false;
+
+  if (!partnerId || partnerAlreadyRequested) {
+    const coupleId = couple._id.toString();
+    await UserModel.updateMany({ coupleId: couple._id }, { coupleId: null });
+    await CoupleModel.findByIdAndDelete(couple._id);
+    return { dissolved: true as const, coupleId, partnerId };
+  }
+
+  if (!alreadyRequested) {
+    couple.pendingLeaveRequestedBy.push(user._id);
+    await couple.save();
+  }
+
+  await createNotification({
+    userId: partnerId,
+    coupleId: couple._id.toString(),
+    type: "couple_leave_request",
+    title: "Your partner wants to leave",
+    body: `${user.name} has asked to end your relationship space. Both of you must agree before it closes.`,
+    data: { coupleId: couple._id.toString(), requestedBy: userId },
+  });
+
+  return { dissolved: false as const, coupleId: couple._id.toString(), partnerId };
+}
+
+export async function cancelLeaveRequest(userId: string) {
+  const user = await UserModel.findById(userId);
+  if (!user?.coupleId) throw AppError.forbidden("You're not part of a relationship space");
+
+  const couple = await CoupleModel.findById(user.coupleId);
+  if (!couple) throw AppError.notFound("Relationship space not found");
+  assertCoupleMember(couple, userId);
+
+  // Either partner can call off a pending leave - the requester retracting it, or the
+  // other partner declining it. Either way both people keep the space, so we clear it entirely.
+  couple.pendingLeaveRequestedBy = [];
+  await couple.save();
+
+  return { coupleId: couple._id.toString(), partnerId: otherPartnerId(couple, userId) };
 }

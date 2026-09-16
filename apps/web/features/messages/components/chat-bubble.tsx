@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Message } from "@withu/shared-types";
 import { Check, CheckCheck, Clock, Pencil, SmilePlus, Trash2 } from "lucide-react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useDeleteMessage, useEditMessage, useToggleReaction } from "@/features/messages/hooks";
 import { useAuthStore } from "@/stores/auth-store";
@@ -28,7 +29,13 @@ export function ChatBubble({ message }: { message: Message }) {
   }, {});
 
   return (
-    <div className={cn("group flex w-full flex-col", isMine ? "items-end" : "items-start")}>
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 12, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      className={cn("group flex w-full flex-col", isMine ? "items-end" : "items-start")}
+    >
       <div
         className={cn(
           "relative max-w-[80%] rounded-2xl px-4 py-2.5 text-sm sm:max-w-[65%]",
@@ -95,7 +102,7 @@ export function ChatBubble({ message }: { message: Message }) {
       )}
 
       {!message.deletedAt && (
-        <div className="mt-1 hidden items-center gap-2 text-xs text-muted-foreground group-hover:flex">
+        <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground md:hidden md:group-hover:flex">
           <div className="relative">
             <button onClick={() => setShowReactions((v) => !v)} aria-label="React">
               <SmilePlus className="h-3.5 w-3.5" />
@@ -129,6 +136,6 @@ export function ChatBubble({ message }: { message: Message }) {
           )}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

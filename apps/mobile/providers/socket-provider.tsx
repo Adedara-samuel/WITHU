@@ -73,6 +73,19 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     socket.on("NOTIFICATION_RECEIVED", () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
     });
+    socket.on("COUPLE_LEAVE_REQUESTED", ({ requestedBy }) => {
+      queryClient.setQueryData<Couple | null>(coupleKey, (prev) => {
+        if (!prev) return prev;
+        if (prev.pendingLeaveRequestedBy.includes(requestedBy)) return prev;
+        return { ...prev, pendingLeaveRequestedBy: [...prev.pendingLeaveRequestedBy, requestedBy] };
+      });
+    });
+    socket.on("COUPLE_LEAVE_CANCELLED", () => {
+      queryClient.setQueryData<Couple | null>(coupleKey, (prev) => (!prev ? prev : { ...prev, pendingLeaveRequestedBy: [] }));
+    });
+    socket.on("COUPLE_DISSOLVED", () => {
+      queryClient.setQueryData(coupleKey, null);
+    });
 
     return () => {
       socket.off("connect", onConnect);
@@ -83,6 +96,9 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       socket.removeAllListeners("MOOD_CHANGED");
       socket.removeAllListeners("STATUS_CHANGED");
       socket.removeAllListeners("NOTIFICATION_RECEIVED");
+      socket.removeAllListeners("COUPLE_LEAVE_REQUESTED");
+      socket.removeAllListeners("COUPLE_LEAVE_CANCELLED");
+      socket.removeAllListeners("COUPLE_DISSOLVED");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken]);

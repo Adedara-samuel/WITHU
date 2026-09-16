@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
@@ -10,11 +11,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow hover:opacity-90 active:scale-[0.98]",
+        default: "bg-primary text-primary-foreground shadow hover:opacity-90",
         secondary: "bg-secondary text-secondary-foreground hover:opacity-80",
         ghost: "hover:bg-muted text-foreground",
         outline: "border border-border bg-transparent hover:bg-muted",
-        ember: "bg-ember text-ember-foreground shadow hover:opacity-90 active:scale-[0.98]",
+        ember: "bg-ember text-ember-foreground shadow hover:opacity-90",
         destructive: "bg-destructive text-destructive-foreground hover:opacity-90",
         link: "text-primary underline-offset-4 hover:underline",
       },
@@ -35,10 +36,24 @@ export interface ButtonProps
   asChild?: boolean;
 }
 
+// A visible, springy tap/hover response on every button in the app is the
+// single highest-leverage way to make interactions feel alive everywhere at once.
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button";
-    return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
+  ({ className, variant, size, asChild = false, disabled, ...props }, ref) => {
+    if (asChild) {
+      return <Slot className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
+    }
+    return (
+      <motion.button
+        ref={ref}
+        className={cn(buttonVariants({ variant, size, className }))}
+        disabled={disabled}
+        whileHover={disabled ? undefined : { scale: 1.035 }}
+        whileTap={disabled ? undefined : { scale: 0.92 }}
+        transition={{ type: "spring", stiffness: 500, damping: 22 }}
+        {...(props as React.ComponentProps<typeof motion.button>)}
+      />
+    );
   }
 );
 Button.displayName = "Button";

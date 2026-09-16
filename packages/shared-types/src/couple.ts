@@ -17,6 +17,9 @@ export interface Couple {
   streakDays: number;
   togetherSince: string;
   createdAt: string;
+  /** User ids who have asked to end the relationship space. Both partners must
+   * request before the space is actually deleted - neither side can end it alone. */
+  pendingLeaveRequestedBy: string[];
 }
 
 export type InvitationStatus = "pending" | "accepted" | "rejected" | "expired";

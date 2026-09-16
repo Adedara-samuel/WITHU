@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { created, ok } from "../../common/response";
 import { AppError } from "../../common/errors";
+import { emitToCouple } from "../../sockets/emitter";
 import * as coupleService from "./couple.service";
 import { toCouple, toInvitation } from "./couple.mapper";
 
@@ -35,7 +36,24 @@ export async function handleRejectInvitation(req: Request, res: Response) {
   return ok(res, { rejected: true });
 }
 
-export async function handleLeaveCouple(req: Request, res: Response) {
-  await coupleService.leaveCouple(req.userId!);
-  return ok(res, { left: true });
+export async function handleRequestLeaveCouple(req: Request, res: Response) {
+  const result = await coupleService.requestLeaveCouple(req.userId!);
+  if (result.dissolved) {
+    emitToCouple(result.coupleId, "COUPLE_DISSOLVED", { coupleId: result.coupleId });
+  } else {
+    emitToCouple(result.coupleId, "COUPLE_LEAVE_REQUESTED", {
+      coupleId: result.coupleId,
+      requestedBy: req.userId!,
+    });
+  }
+  return ok(res, result);
+}
+
+export async function handleCancelLeaveRequest(req: Request, res: Response) {
+  const result = await coupleService.cancelLeaveRequest(req.userId!);
+  emitToCouple(result.coupleId, "COUPLE_LEAVE_CANCELLED", {
+    coupleId: result.coupleId,
+    cancelledBy: req.userId!,
+  });
+  return ok(res, { cancelled: true });
 }

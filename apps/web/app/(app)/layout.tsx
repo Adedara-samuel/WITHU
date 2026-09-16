@@ -6,6 +6,8 @@ import { Loader2 } from "lucide-react";
 import { AuthGuard } from "@/components/auth-guard";
 import { AppShell } from "@/components/layout/app-shell";
 import { useMyCouple } from "@/features/couple/hooks";
+import { CallProvider } from "@/features/calls/call-context";
+import { CallOverlay } from "@/features/calls/call-overlay";
 
 function CoupleGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -30,7 +32,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthGuard>
       <CoupleGate>
-        <AppShell>{children}</AppShell>
+        <CallProvider>
+          <AppShell>{children}</AppShell>
+          <CallOverlay />
+        </CallProvider>
       </CoupleGate>
     </AuthGuard>
   );

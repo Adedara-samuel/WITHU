@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/toast";
 import { useLogout } from "@/features/auth/hooks";
-import { useLeaveCouple, useMyCouple, useUpdateCouple } from "@/features/couple/hooks";
+import { useCancelLeaveRequest, useMyCouple, useRequestLeaveCouple, useUpdateCouple } from "@/features/couple/hooks";
 import { useUpdatePreferences, useUpdateProfile } from "@/features/profile/hooks";
 import { useAuthStore } from "@/stores/auth-store";
 
@@ -23,7 +23,8 @@ export default function SettingsPage() {
   const updateProfile = useUpdateProfile();
   const updateCouple = useUpdateCouple();
   const updatePreferences = useUpdatePreferences();
-  const leaveCouple = useLeaveCouple();
+  const requestLeave = useRequestLeaveCouple();
+  const cancelLeave = useCancelLeaveRequest();
   const logout = useLogout();
   const router = useRouter();
   const { show } = useToast();
@@ -129,16 +130,76 @@ export default function SettingsPage() {
                   </Button>
 
                   <div className="border-t border-border pt-4">
-                    <Button
-                      variant="destructive"
-                      onClick={() => {
-                        if (confirm("This will end your shared space for both of you. Continue?")) {
-                          leaveCouple.mutate(undefined, { onSuccess: () => router.replace("/onboarding/couple") });
-                        }
-                      }}
-                    >
-                      Leave relationship space
-                    </Button>
+                    {(() => {
+                      const iRequested = user ? couple.pendingLeaveRequestedBy.includes(user.id) : false;
+                      const partnerRequested = couple.pendingLeaveRequestedBy.some((id) => id !== user?.id);
+
+                      if (partnerRequested) {
+                        const partnerName =
+                          couple.partnerOne.id !== user?.id ? couple.partnerOne.name : couple.partnerTwo?.name;
+                        return (
+                          <div className="space-y-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+                            <p className="text-sm font-medium">
+                              {partnerName ?? "Your partner"} wants to end this relationship space.
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Nothing happens unless you also agree. You can confirm to close the space for both of
+                              you, or dismiss to stay together.
+                            </p>
+                            <div className="flex gap-2">
+                              <Button variant="outline" onClick={() => cancelLeave.mutate()} disabled={cancelLeave.isPending}>
+                                Stay together
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                onClick={() =>
+                                  requestLeave.mutate(undefined, {
+                                    onSuccess: (result) => {
+                                      if (result.dissolved) router.replace("/onboarding/couple");
+                                    },
+                                  })
+                                }
+                                disabled={requestLeave.isPending}
+                              >
+                                Confirm & leave
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      if (iRequested) {
+                        return (
+                          <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3">
+                            <p className="text-sm font-medium">You asked to leave this relationship space.</p>
+                            <p className="text-xs text-muted-foreground">
+                              Waiting for your partner to confirm - nothing has been deleted yet.
+                            </p>
+                            <Button variant="outline" onClick={() => cancelLeave.mutate()} disabled={cancelLeave.isPending}>
+                              Cancel my request
+                            </Button>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <Button
+                          variant="destructive"
+                          onClick={() => {
+                            if (confirm("Ask your partner to end your shared space? They'll need to confirm too before anything is deleted.")) {
+                              requestLeave.mutate(undefined, {
+                                onSuccess: (result) => {
+                                  if (result.dissolved) router.replace("/onboarding/couple");
+                                },
+                              });
+                            }
+                          }}
+                          disabled={requestLeave.isPending}
+                        >
+                          Leave relationship space
+                        </Button>
+                      );
+                    })()}
                   </div>
                 </>
               )}

@@ -53,10 +53,24 @@ export function useAcceptInvitation() {
   });
 }
 
-export function useLeaveCouple() {
+export function useRequestLeaveCouple() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => coupleApi.leave(),
-    onSuccess: () => queryClient.setQueryData(coupleKey, null),
+    mutationFn: () => coupleApi.requestLeave(),
+    onSuccess: (result) => {
+      if (result.dissolved) {
+        queryClient.setQueryData(coupleKey, null);
+      } else {
+        queryClient.invalidateQueries({ queryKey: coupleKey });
+      }
+    },
+  });
+}
+
+export function useCancelLeaveRequest() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => coupleApi.cancelLeave(),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: coupleKey }),
   });
 }

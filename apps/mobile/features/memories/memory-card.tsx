@@ -1,4 +1,5 @@
 import { Alert, Image, Pressable, Text, View } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
 import type { Memory } from "@withu/shared-types";
 import { Trash2 } from "lucide-react-native";
 import { useDeleteMemory } from "@/features/memories/hooks";
@@ -21,7 +22,11 @@ export function MemoryCard({ memory }: { memory: Memory }) {
   const mine = memory.authorId === user?.id;
 
   return (
-    <View className="mb-3 overflow-hidden rounded-2xl border border-border bg-card" style={{ width: "48%" }}>
+    <Animated.View
+      entering={FadeIn.duration(280).springify()}
+      className="mb-3 overflow-hidden rounded-2xl border border-border bg-card"
+      style={{ width: "48%" }}
+    >
       {memory.photo && <Image source={{ uri: memory.photo.thumbnailUrl }} style={{ width: "100%", height: 110 }} />}
       <View className="gap-1 p-3">
         <Text className="text-[10px] font-sans-medium uppercase text-primary">{CATEGORY_LABEL[memory.category]}</Text>
@@ -47,6 +52,6 @@ export function MemoryCard({ memory }: { memory: Memory }) {
           </Text>
         )}
       </View>
-    </View>
+    </Animated.View>
   );
 }

@@ -17,7 +17,8 @@ router.use(requireAuth);
 router.post("/", validateBody(createCoupleSchema), asyncHandler(controller.handleCreateCouple));
 router.get("/me", asyncHandler(controller.handleGetMyCouple));
 router.patch("/me", validateBody(updateCoupleSchema), asyncHandler(controller.handleUpdateCouple));
-router.post("/leave", asyncHandler(controller.handleLeaveCouple));
+router.post("/leave/request", asyncHandler(controller.handleRequestLeaveCouple));
+router.post("/leave/cancel", asyncHandler(controller.handleCancelLeaveRequest));
 
 router.post("/invite", validateBody(createInvitationSchema), asyncHandler(controller.handleCreateInvitation));
 router.post("/accept", validateBody(acceptInvitationSchema), asyncHandler(controller.handleAcceptInvitation));

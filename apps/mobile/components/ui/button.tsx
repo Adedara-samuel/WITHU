@@ -1,5 +1,10 @@
-import { ActivityIndicator, Pressable, Text, type PressableProps } from "react-native";
+import { ActivityIndicator, Pressable, Text, type GestureResponderEvent, type PressableProps } from "react-native";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { cn } from "@/lib/cn";
+
+// react-native-reanimated's Animatable typings lag behind the React types this
+// project uses, so createAnimatedComponent needs a loose cast here.
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable as any);
 
 type Variant = "default" | "secondary" | "outline" | "ghost" | "ember" | "destructive";
 type Size = "default" | "sm" | "lg" | "icon";
@@ -38,6 +43,8 @@ interface ButtonProps extends PressableProps {
   children: React.ReactNode;
 }
 
+// A visible spring-back scale on every press is the single highest-leverage way
+// to make the whole app feel responsive, since almost every action goes through here.
 export function Button({
   variant = "default",
   size = "default",
@@ -46,12 +53,26 @@ export function Button({
   loading,
   disabled,
   children,
+  onPressIn,
+  onPressOut,
   ...props
 }: ButtonProps) {
   const isDisabled = disabled || loading;
+  const scale = useSharedValue(1);
+  const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+
   return (
-    <Pressable
+    <AnimatedPressable
       disabled={isDisabled}
+      onPressIn={(e: GestureResponderEvent) => {
+        scale.value = withSpring(0.92, { stiffness: 500, damping: 20 });
+        onPressIn?.(e);
+      }}
+      onPressOut={(e: GestureResponderEvent) => {
+        scale.value = withSpring(1, { stiffness: 400, damping: 14 });
+        onPressOut?.(e);
+      }}
+      style={animatedStyle}
       className={cn(
         "flex-row items-center justify-center gap-2 rounded-full",
         VARIANT_CLASSES[variant],
@@ -67,6 +88,6 @@ export function Button({
       ) : (
         children
       )}
-    </Pressable>
+    </AnimatedPressable>
   );
 }

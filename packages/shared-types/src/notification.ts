@@ -10,7 +10,9 @@ export type NotificationType =
   | "daily_challenge"
   | "memory"
   | "milestone"
-  | "couple_invite";
+  | "couple_invite"
+  | "couple_leave_request"
+  | "missed_call";
 
 export interface AppNotification {
   id: string;

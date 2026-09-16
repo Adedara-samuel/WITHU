@@ -5,6 +5,7 @@ export * from "./love-drop";
 export * from "./game";
 export * from "./memory";
 export * from "./together";
+export * from "./call";
 export * from "./notification";
 export * from "./socket-events";
 export * from "./api";
