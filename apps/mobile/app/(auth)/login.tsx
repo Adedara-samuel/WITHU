@@ -3,7 +3,7 @@ import { Link, router } from "expo-router";
 import { Image, KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
 import { loginSchema } from "@withu/validation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input, PasswordInput } from "@/components/ui/input";
 import { useLogin } from "@/features/auth/hooks";
 import { ApiError } from "@/lib/api-client";
 
@@ -43,7 +43,7 @@ export default function LoginScreen() {
 
         <View className="gap-4">
           <Input placeholder="Email" autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} />
-          <Input placeholder="Password" secureTextEntry value={password} onChangeText={setPassword} />
+          <PasswordInput placeholder="Password" value={password} onChangeText={setPassword} />
           {error && <Text className="text-sm text-destructive">{error}</Text>}
           <Button size="lg" onPress={onSubmit} loading={login.isPending}>
             Sign in

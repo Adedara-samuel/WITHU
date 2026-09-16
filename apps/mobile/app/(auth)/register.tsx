@@ -3,7 +3,7 @@ import { Link, router } from "expo-router";
 import { Image, KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
 import { registerSchema } from "@withu/validation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input, PasswordInput } from "@/components/ui/input";
 import { useRegister } from "@/features/auth/hooks";
 import { ApiError } from "@/lib/api-client";
 
@@ -46,7 +46,7 @@ export default function RegisterScreen() {
           <Input placeholder="Your name" value={form.name} onChangeText={set("name")} />
           <Input placeholder="Username" autoCapitalize="none" value={form.username} onChangeText={set("username")} />
           <Input placeholder="Email" autoCapitalize="none" keyboardType="email-address" value={form.email} onChangeText={set("email")} />
-          <Input placeholder="Password (min 8 characters)" secureTextEntry value={form.password} onChangeText={set("password")} />
+          <PasswordInput placeholder="Password (min 8 characters)" value={form.password} onChangeText={set("password")} />
           {error && <Text className="text-sm text-destructive">{error}</Text>}
           <Button size="lg" onPress={onSubmit} loading={register.isPending}>
             Create account

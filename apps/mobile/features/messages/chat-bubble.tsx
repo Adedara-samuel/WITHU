@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { Alert, Pressable, Text, View } from "react-native";
 import Animated, { FadeInUp } from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
 import type { Message } from "@withu/shared-types";
 import { useAuthStore } from "@/stores/auth-store";
 import { useDeleteMessage, useToggleReaction } from "@/features/messages/hooks";
@@ -23,6 +24,7 @@ export function ChatBubble({ message }: { message: Message }) {
   const onPress = () => {
     const now = Date.now();
     if (now - lastTap.current < 280) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => undefined);
       toggleReaction.mutate({ messageId: message.id, emoji: "❤️", hasMine: myHeart });
     }
     lastTap.current = now;
@@ -30,6 +32,7 @@ export function ChatBubble({ message }: { message: Message }) {
 
   const onLongPress = () => {
     if (!isMine || message.deletedAt) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined);
     Alert.alert("Delete message?", undefined, [
       { text: "Cancel", style: "cancel" },
       { text: "Delete", style: "destructive", onPress: () => deleteMessage.mutate(message.id) },

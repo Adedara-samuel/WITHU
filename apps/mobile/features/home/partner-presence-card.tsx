@@ -1,5 +1,5 @@
 import { Text, View } from "react-native";
-import { Flame, Heart } from "lucide-react-native";
+import { Heart } from "lucide-react-native";
 import { moodEmoji } from "@withu/constants";
 import type { Couple, PublicUser } from "@withu/shared-types";
 import { formatRelativeTime } from "@withu/shared-utils";
@@ -40,13 +40,6 @@ export function PartnerPresenceCard({ couple, meId }: { couple: Couple; meId: st
             <Heart size={20} color="#276852" fill="#27685222" />
           </View>
           <PartnerBlock partner={partner} />
-        </View>
-
-        <View className="flex-row items-center justify-center gap-1.5 border-t border-border pt-3">
-          <Flame size={14} color="#C26447" />
-          <Text className="text-sm text-foreground">
-            <Text className="font-sans-medium">{couple.streakDays}</Text> day{couple.streakDays === 1 ? "" : "s"} together
-          </Text>
         </View>
       </CardContent>
     </Card>

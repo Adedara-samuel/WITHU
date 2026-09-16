@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as Haptics from "expo-haptics";
 import { PartyPopper, X } from "lucide-react-native";
 import { Button } from "@/components/ui/button";
 import { AnswerBothGame } from "@/features/games/answer-both-game";
@@ -25,8 +26,16 @@ export default function GameSessionScreen() {
   const celebrated = useRef(false);
 
   useEffect(() => {
-    if (session?.status === "completed") celebrated.current = true;
+    if (session?.status === "completed" && !celebrated.current) {
+      celebrated.current = true;
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => undefined);
+    }
   }, [session?.status]);
+
+  const move = (payload: Record<string, unknown>) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined);
+    submitMove.mutate(payload);
+  };
 
   if (isLoading || !session || !user) {
     return (
@@ -71,14 +80,14 @@ export default function GameSessionScreen() {
 
         {(session.status === "active" || session.status === "completed") && (
           <>
-            {session.gameKey === "tic_tac_toe" && <TicTacToeBoard session={session} meId={user.id} onMove={(p) => submitMove.mutate(p)} />}
-            {session.gameKey === "connect_four" && <ConnectFourBoard session={session} meId={user.id} onMove={(p) => submitMove.mutate(p)} />}
-            {session.gameKey === "memory_match" && <MemoryMatchBoard session={session} meId={user.id} onMove={(p) => submitMove.mutate(p)} />}
+            {session.gameKey === "tic_tac_toe" && <TicTacToeBoard session={session} meId={user.id} onMove={move} />}
+            {session.gameKey === "connect_four" && <ConnectFourBoard session={session} meId={user.id} onMove={move} />}
+            {session.gameKey === "memory_match" && <MemoryMatchBoard session={session} meId={user.id} onMove={move} />}
             {TURN_GAMES.has(session.gameKey) && (
-              <QuestionTurnGame session={session} meId={user.id} onMove={(p) => submitMove.mutate(p)} pending={submitMove.isPending} />
+              <QuestionTurnGame session={session} meId={user.id} onMove={move} pending={submitMove.isPending} />
             )}
             {ANSWER_BOTH_GAMES.has(session.gameKey) && (
-              <AnswerBothGame session={session} meId={user.id} onMove={(p) => submitMove.mutate(p)} pending={submitMove.isPending} />
+              <AnswerBothGame session={session} meId={user.id} onMove={move} pending={submitMove.isPending} />
             )}
           </>
         )}

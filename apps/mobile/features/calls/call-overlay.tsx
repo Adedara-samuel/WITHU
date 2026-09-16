@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Modal, Pressable, View, Text } from "react-native";
 import { RTCView } from "react-native-webrtc";
+import * as Haptics from "expo-haptics";
 import { Mic, MicOff, Phone, PhoneOff, Video, VideoOff } from "lucide-react-native";
 import { Avatar } from "@/components/ui/avatar";
 import { useMyCouple } from "@/features/couple/hooks";
@@ -39,8 +40,14 @@ function ControlButton({
     danger: "bg-red-500",
     success: "bg-emerald-500",
   }[tone];
+  const onPressWithHaptic = () => {
+    if (tone === "success") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => undefined);
+    else if (tone === "danger") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => undefined);
+    else Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined);
+    onPress();
+  };
   return (
-    <Pressable onPress={onPress} className={`h-16 w-16 items-center justify-center rounded-full ${bg}`}>
+    <Pressable onPress={onPressWithHaptic} className={`h-16 w-16 items-center justify-center rounded-full ${bg}`}>
       {children}
     </Pressable>
   );
@@ -54,6 +61,14 @@ export function CallOverlay() {
 
   const visible = state.phase !== "idle";
   const isVideo = state.kind === "video";
+
+  useEffect(() => {
+    if (state.phase !== "incoming") return;
+    const buzz = () => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => undefined);
+    buzz();
+    const id = setInterval(buzz, 1400);
+    return () => clearInterval(id);
+  }, [state.phase]);
 
   return (
     <Modal visible={visible} animationType="fade" statusBarTranslucent onRequestClose={endCall}>

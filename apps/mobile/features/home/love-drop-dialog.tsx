@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
+import * as Haptics from "expo-haptics";
 import { Mail, Send } from "lucide-react-native";
 import { LOVE_DROP_PRESETS } from "@withu/constants";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ export function LoveDropDialog() {
   const send = async () => {
     if (!message.trim()) return;
     await sendLoveDrop.mutateAsync({ kind: "text", message: message.trim() });
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => undefined);
     show({ title: "Love Drop sent 💌", description: "It just landed in their space.", variant: "love" });
     setMessage("");
     setOpen(false);

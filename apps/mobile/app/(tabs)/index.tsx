@@ -7,6 +7,7 @@ import { useAffectionRealtime } from "@/features/affection/hooks";
 import { useToast } from "@/components/ui/toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { PartnerPresenceCard } from "@/features/home/partner-presence-card";
+import { StreakBadge } from "@/features/home/streak-badge";
 import { MoodStatusPicker } from "@/features/home/mood-status-picker";
 import { QuickAffectionGrid } from "@/features/home/quick-affection-grid";
 import { LoveDropDialog } from "@/features/home/love-drop-dialog";
@@ -42,11 +43,12 @@ export default function OurSpaceScreen() {
     <SafeAreaView edges={["top"]} className="flex-1 bg-background">
       <ScrollView contentContainerStyle={{ gap: 20, padding: 16, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
         <View className="flex-row items-center justify-between">
-          <View>
+          <View className="gap-2">
             <Text className="text-xs font-sans-medium uppercase tracking-widest text-muted-foreground">Our Space</Text>
             <Text className="font-display text-2xl text-foreground">
               {couple.partnerOne.name} & {couple.partnerTwo?.name}
             </Text>
+            <StreakBadge days={couple.streakDays} />
           </View>
           <Pressable onPress={() => router.push("/settings")} hitSlop={10}>
             <Settings size={22} color="#63746E" />

@@ -3,7 +3,7 @@
 import { moodEmoji } from "@withu/constants";
 import type { Couple, PublicUser } from "@withu/shared-types";
 import { formatRelativeTime } from "@withu/shared-utils";
-import { Flame, Heart } from "lucide-react";
+import { Heart } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PresenceDot } from "@/components/ui/presence-dot";
 import { Card, CardContent } from "@/components/ui/card";
@@ -46,16 +46,11 @@ export function PartnerPresenceCard({ couple, meId }: { couple: Couple; meId: st
           <PartnerBlock partner={partner} align="right" />
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-4 border-t border-border pt-4 text-center">
-          <div className="flex items-center gap-1.5 text-sm">
-            <Flame className="h-4 w-4 text-ember" />
-            <span className="font-semibold">{couple.streakDays}</span>
-            <span className="text-muted-foreground">day{couple.streakDays === 1 ? "" : "s"} together</span>
-          </div>
-          {couple.relationshipName && (
+        {couple.relationshipName && (
+          <div className="flex justify-center border-t border-border pt-4">
             <p className="text-sm text-muted-foreground">{couple.relationshipName}</p>
-          )}
-        </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

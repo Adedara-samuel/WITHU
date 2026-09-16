@@ -5,7 +5,7 @@ export function AnimatedTabIcon({ focused, children }: { focused: boolean; child
   const scale = useSharedValue(1);
 
   useEffect(() => {
-    scale.value = withSpring(focused ? 1.22 : 1, { stiffness: 400, damping: 12 });
+    scale.value = withSpring(focused ? 1.3 : 1, { stiffness: 500, damping: 9 });
   }, [focused, scale]);
 
   const style = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));

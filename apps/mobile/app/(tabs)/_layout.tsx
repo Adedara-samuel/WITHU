@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Redirect, router, Tabs } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
+import * as Haptics from "expo-haptics";
 import { Gamepad2, Heart, Image as ImageIcon, MessageCircle, Sparkles } from "lucide-react-native";
 import { useAuthStore } from "@/stores/auth-store";
 import { useMyCouple } from "@/features/couple/hooks";
@@ -34,6 +35,9 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: "#63746E",
         tabBarStyle: { height: 60, paddingBottom: 8, paddingTop: 6 },
         tabBarLabelStyle: { fontSize: 11 },
+      }}
+      screenListeners={{
+        tabPress: () => Haptics.selectionAsync().catch(() => undefined),
       }}
     >
       <Tabs.Screen

@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { registerSchema } from "@withu/validation";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input, PasswordInput } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRegister } from "@/features/auth/hooks";
 import { ApiError } from "@/lib/api-client";
@@ -60,7 +60,7 @@ export default function RegisterPage() {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="password">Password</Label>
-          <Input id="password" type="password" autoComplete="new-password" value={form.password} onChange={update("password")} placeholder="At least 8 characters" required />
+          <PasswordInput id="password" autoComplete="new-password" value={form.password} onChange={update("password")} placeholder="At least 8 characters" required />
         </div>
 
         {error && <p className="text-sm text-destructive">{error}</p>}

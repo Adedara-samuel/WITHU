@@ -12,7 +12,7 @@ export function QuickAffectionGrid() {
         <Pressable
           key={a.value}
           onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined);
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => undefined);
             sendAffection.mutate({ kind: a.value });
           }}
           className="items-center gap-1 rounded-2xl bg-secondary px-4 py-3"

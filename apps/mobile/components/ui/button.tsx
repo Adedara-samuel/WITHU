@@ -1,5 +1,6 @@
 import { ActivityIndicator, Pressable, Text, type GestureResponderEvent, type PressableProps } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
 import { cn } from "@/lib/cn";
 
 // react-native-reanimated's Animatable typings lag behind the React types this
@@ -43,8 +44,10 @@ interface ButtonProps extends PressableProps {
   children: React.ReactNode;
 }
 
-// A visible spring-back scale on every press is the single highest-leverage way
-// to make the whole app feel responsive, since almost every action goes through here.
+// A bouncy spring-back scale plus a light haptic tick on every press is the single
+// highest-leverage way to make the whole app feel alive, since almost every action
+// goes through here - this is the "it just feels good to tap" quality of apps like
+// Instagram/TikTok, not just a visual nicety.
 export function Button({
   variant = "default",
   size = "default",
@@ -65,11 +68,12 @@ export function Button({
     <AnimatedPressable
       disabled={isDisabled}
       onPressIn={(e: GestureResponderEvent) => {
-        scale.value = withSpring(0.92, { stiffness: 500, damping: 20 });
+        scale.value = withSpring(0.9, { stiffness: 600, damping: 15 });
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined);
         onPressIn?.(e);
       }}
       onPressOut={(e: GestureResponderEvent) => {
-        scale.value = withSpring(1, { stiffness: 400, damping: 14 });
+        scale.value = withSpring(1, { stiffness: 300, damping: 8 });
         onPressOut?.(e);
       }}
       style={animatedStyle}

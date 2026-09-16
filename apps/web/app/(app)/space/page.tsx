@@ -10,6 +10,7 @@ import { DailyChallengeCard } from "@/features/home/components/daily-challenge-c
 import { LoveDropDialog } from "@/features/home/components/love-drop-dialog";
 import { MoodStatusPicker } from "@/features/home/components/mood-status-picker";
 import { PartnerPresenceCard } from "@/features/home/components/partner-presence-card";
+import { StreakBadge } from "@/features/home/components/streak-badge";
 import { QuickAffectionGrid } from "@/features/home/components/quick-affection-grid";
 import { useMyCouple } from "@/features/couple/hooks";
 import { useAuthStore } from "@/stores/auth-store";
@@ -43,11 +44,12 @@ export default function OurSpacePage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-4 sm:p-6 lg:p-10">
       <div className="flex items-center justify-between">
-        <div>
+        <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Our Space</p>
           <h1 className="font-display text-2xl font-medium">
             {couple.partnerOne.name} <span className="text-primary">&amp;</span> {couple.partnerTwo?.name}
           </h1>
+          <StreakBadge days={couple.streakDays} />
         </div>
         <NotificationBell />
       </div>
