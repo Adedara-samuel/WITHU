@@ -82,7 +82,7 @@ export function Button({
       )}
       {...props}
     >
-      {loading && <ActivityIndicator size="small" color={variant === "outline" || variant === "ghost" ? "#7A2C4C" : "#fff"} />}
+      {loading && <ActivityIndicator size="small" color={variant === "outline" || variant === "ghost" ? "#276852" : "#fff"} />}
       {typeof children === "string" ? (
         <Text className={cn("text-sm font-sans-medium", TEXT_CLASSES[variant], textClassName)}>{children}</Text>
       ) : (

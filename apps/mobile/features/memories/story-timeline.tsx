@@ -44,7 +44,7 @@ function AddMilestoneDialog() {
   return (
     <>
       <Button size="sm" variant="secondary" onPress={() => setOpen(true)}>
-        <Plus size={14} color="#5C2138" />
+        <Plus size={14} color="#214539" />
         <Text className="text-xs font-sans-medium text-secondary-foreground">Add milestone</Text>
       </Button>
       <Dialog visible={open} onClose={() => setOpen(false)} title="Add a milestone">

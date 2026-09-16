@@ -58,7 +58,7 @@ export default function TogetherScreen() {
           <CardContent className="items-center gap-4 py-8">
             <View className="flex-row items-center gap-4">
               <Avatar uri={user.avatarUrl} name={user.name} size={64} />
-              <Heart size={22} color="#7A2C4C" fill="#7A2C4C22" />
+              <Heart size={22} color="#276852" fill="#27685222" />
               <Avatar uri={partner?.avatarUrl} name={partner?.name ?? "?"} size={64} />
             </View>
 
@@ -97,7 +97,7 @@ export default function TogetherScreen() {
               className="items-center gap-2 rounded-2xl border border-border bg-card px-5 py-4"
               style={{ minWidth: "44%" }}
             >
-              <MessageCircle size={20} color="#7A2C4C" />
+              <MessageCircle size={20} color="#276852" />
               <Text className="text-xs font-sans-medium text-foreground">Chat</Text>
             </Pressable>
             <Pressable
@@ -105,7 +105,7 @@ export default function TogetherScreen() {
               className="items-center gap-2 rounded-2xl border border-border bg-card px-5 py-4"
               style={{ minWidth: "44%" }}
             >
-              <Gamepad2 size={20} color="#7A2C4C" />
+              <Gamepad2 size={20} color="#276852" />
               <Text className="text-xs font-sans-medium text-foreground">Play</Text>
             </Pressable>
             <View className="flex-1" style={{ minWidth: "44%" }}>

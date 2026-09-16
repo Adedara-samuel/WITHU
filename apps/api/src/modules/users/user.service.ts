@@ -44,3 +44,11 @@ export async function updatePreferences(userId: string, input: UpdatePreferences
 export async function touchLastSeen(userId: string) {
   await UserModel.findByIdAndUpdate(userId, { lastSeen: new Date() });
 }
+
+export async function registerPushToken(userId: string, token: string) {
+  await UserModel.findByIdAndUpdate(userId, { $addToSet: { pushTokens: token } });
+}
+
+export async function removePushToken(userId: string, token: string) {
+  await UserModel.findByIdAndUpdate(userId, { $pull: { pushTokens: token } });
+}

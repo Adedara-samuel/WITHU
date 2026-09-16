@@ -28,7 +28,7 @@ export function Dialog({
           <View className="flex-row items-center justify-between border-b border-border px-5 py-4">
             <Text className="font-display text-lg text-foreground">{title}</Text>
             <Pressable onPress={onClose} hitSlop={10} className="h-9 w-9 items-center justify-center rounded-full">
-              <X size={20} color="#6B5D63" />
+              <X size={20} color="#63746E" />
             </Pressable>
           </View>
           <View className="p-5" style={{ maxHeight: height * 0.75 }}>

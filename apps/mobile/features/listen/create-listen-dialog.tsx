@@ -26,7 +26,7 @@ export function CreateListenDialog() {
   return (
     <>
       <Button variant="secondary" onPress={() => setOpen(true)}>
-        <Music size={16} color="#5C2138" />
+        <Music size={16} color="#214539" />
         <Text className="text-sm font-sans-medium text-secondary-foreground">Listen Together</Text>
       </Button>
       <Dialog visible={open} onClose={() => setOpen(false)} title="Start a listening session">

@@ -105,7 +105,7 @@ function Row({ label, description, value, onChange }: { label: string; descripti
         <Text className="text-sm text-foreground">{label}</Text>
         {description && <Text className="text-xs text-muted-foreground">{description}</Text>}
       </View>
-      <Switch value={value} onValueChange={onChange} trackColor={{ true: "#7A2C4C" }} />
+      <Switch value={value} onValueChange={onChange} trackColor={{ true: "#276852" }} />
     </View>
   );
 }
@@ -130,7 +130,7 @@ export default function SettingsScreen() {
     <SafeAreaView edges={["top"]} className="flex-1 bg-background">
       <View className="flex-row items-center gap-2 border-b border-border px-4 py-3">
         <Pressable onPress={() => router.back()} hitSlop={10}>
-          <ChevronLeft size={22} color="#221019" />
+          <ChevronLeft size={22} color="#1A2320" />
         </Pressable>
         <Text className="font-display text-lg text-foreground">Settings</Text>
       </View>
@@ -227,7 +227,7 @@ export default function SettingsScreen() {
         </Section>
 
         <Button variant="outline" onPress={() => logout.mutate(undefined, { onSuccess: () => router.replace("/login") })}>
-          <LogOut size={16} color="#221019" />
+          <LogOut size={16} color="#1A2320" />
           <Text className="text-sm font-sans-medium text-foreground">Log out</Text>
         </Button>
       </ScrollView>

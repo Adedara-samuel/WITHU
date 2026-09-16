@@ -21,7 +21,7 @@ export default function TabsLayout() {
   if (isLoading || !couple?.partnerTwo) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator color="#7A2C4C" />
+        <ActivityIndicator color="#276852" />
       </View>
     );
   }
@@ -30,8 +30,8 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#7A2C4C",
-        tabBarInactiveTintColor: "#6B5D63",
+        tabBarActiveTintColor: "#276852",
+        tabBarInactiveTintColor: "#63746E",
         tabBarStyle: { height: 60, paddingBottom: 8, paddingTop: 6 },
         tabBarLabelStyle: { fontSize: 11 },
       }}

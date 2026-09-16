@@ -25,7 +25,7 @@ export function LoveDropDialog() {
   return (
     <>
       <Button variant="ember" onPress={() => setOpen(true)}>
-        <Mail size={16} color="#FDF4EF" />
+        <Mail size={16} color="#FCFAF8" />
         <Text className="text-sm font-sans-medium text-ember-foreground">Love Drop</Text>
       </Button>
       <Dialog visible={open} onClose={() => setOpen(false)} title="Send a Love Drop">

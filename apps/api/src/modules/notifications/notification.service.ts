@@ -5,6 +5,7 @@ import { NotificationModel } from "./notification.model";
 import { DailyChallengeModel } from "./daily-challenge.model";
 import { emitToUser } from "../../sockets/emitter";
 import { toNotification } from "./notification.mapper";
+import { sendPushToUser } from "./push.service";
 import { UserModel } from "../users/user.model";
 
 interface CreateNotificationInput {
@@ -32,11 +33,9 @@ const PREFERENCE_KEY_BY_TYPE: Partial<Record<NotificationType, "messages" | "lov
 
 export async function createNotification(input: CreateNotificationInput) {
   const prefKey = PREFERENCE_KEY_BY_TYPE[input.type];
-  if (prefKey) {
-    const recipient = await UserModel.findById(input.userId).select("preferences");
-    if (recipient && !recipient.preferences.notifications[prefKey]) {
-      return null; // recipient opted out of this notification category
-    }
+  const recipient = await UserModel.findById(input.userId).select("preferences pushTokens");
+  if (prefKey && recipient && !recipient.preferences.notifications[prefKey]) {
+    return null; // recipient opted out of this notification category
   }
 
   const notification = await NotificationModel.create({
@@ -49,6 +48,17 @@ export async function createNotification(input: CreateNotificationInput) {
   });
 
   emitToUser(input.userId, "NOTIFICATION_RECEIVED", { notification: toNotification(notification) });
+
+  // Also deliver a real OS push, so the recipient is notified even with the app
+  // closed or backgrounded - sockets only reach a device with the app open.
+  if (recipient?.pushTokens.length) {
+    sendPushToUser(input.userId, recipient.pushTokens, {
+      title: input.title,
+      body: input.body,
+      data: { type: input.type, coupleId: input.coupleId, ...input.data },
+    }).catch(() => undefined);
+  }
+
   return notification;
 }
 

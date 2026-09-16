@@ -37,13 +37,13 @@ export function PartnerPresenceCard({ couple, meId }: { couple: Couple; meId: st
         <View className="flex-row items-start">
           <PartnerBlock partner={me} />
           <View className="items-center justify-center pt-6">
-            <Heart size={20} color="#7A2C4C" fill="#7A2C4C22" />
+            <Heart size={20} color="#276852" fill="#27685222" />
           </View>
           <PartnerBlock partner={partner} />
         </View>
 
         <View className="flex-row items-center justify-center gap-1.5 border-t border-border pt-3">
-          <Flame size={14} color="#D9704A" />
+          <Flame size={14} color="#C26447" />
           <Text className="text-sm text-foreground">
             <Text className="font-sans-medium">{couple.streakDays}</Text> day{couple.streakDays === 1 ? "" : "s"} together
           </Text>

@@ -26,7 +26,7 @@ export default function CoupleOnboardingScreen() {
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator color="#7A2C4C" />
+        <ActivityIndicator color="#276852" />
       </View>
     );
   }
@@ -102,7 +102,7 @@ export default function CoupleOnboardingScreen() {
                 size="sm"
                 onPress={() => Share.share({ message: `Join me on WITHU! Use code: ${inviteCode}` })}
               >
-                <Share2 size={14} color="#5C2138" />
+                <Share2 size={14} color="#214539" />
                 <Text className="text-sm font-sans-medium text-secondary-foreground">Share</Text>
               </Button>
             </View>

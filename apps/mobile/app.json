@@ -40,6 +40,12 @@
           "cameraPermissionText": "WITHU needs camera access for video calls with your partner.",
           "microphonePermissionText": "WITHU needs microphone access for calls with your partner."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#276852"
+        }
       ]
     ],
     "extra": {

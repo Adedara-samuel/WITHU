@@ -31,7 +31,7 @@ export function CreateWatchDialog() {
   return (
     <>
       <Button variant="secondary" onPress={() => setOpen(true)}>
-        <Video size={16} color="#5C2138" />
+        <Video size={16} color="#214539" />
         <Text className="text-sm font-sans-medium text-secondary-foreground">Watch Together</Text>
       </Button>
       <Dialog visible={open} onClose={() => setOpen(false)} title="Start a watch session">

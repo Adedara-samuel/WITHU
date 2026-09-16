@@ -5,6 +5,7 @@ import { SocketProvider } from "./socket-provider";
 import { ToastProvider } from "@/components/ui/toast";
 import { CallProvider } from "@/features/calls/call-context";
 import { CallOverlay } from "@/features/calls/call-overlay";
+import { PushNotificationProvider } from "@/features/notifications/push-provider";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(createQueryClient);
@@ -13,10 +14,12 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
         <SocketProvider>
-          <CallProvider>
-            {children}
-            <CallOverlay />
-          </CallProvider>
+          <PushNotificationProvider>
+            <CallProvider>
+              {children}
+              <CallOverlay />
+            </CallProvider>
+          </PushNotificationProvider>
         </SocketProvider>
       </ToastProvider>
     </QueryClientProvider>

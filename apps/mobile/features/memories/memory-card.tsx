@@ -42,7 +42,7 @@ export function MemoryCard({ memory }: { memory: Memory }) {
               }
               hitSlop={6}
             >
-              <Trash2 size={13} color="#6B5D63" />
+              <Trash2 size={13} color="#63746E" />
             </Pressable>
           )}
         </View>

@@ -34,7 +34,7 @@ export default function MemoriesScreen() {
 
         {tab === "memories" ? (
           isLoading ? (
-            <ActivityIndicator color="#7A2C4C" />
+            <ActivityIndicator color="#276852" />
           ) : memories.length === 0 ? (
             <View className="items-center gap-1 py-16">
               <Text className="font-display text-lg text-foreground">No memories yet ❤️</Text>

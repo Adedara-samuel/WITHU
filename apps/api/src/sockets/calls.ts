@@ -2,6 +2,7 @@ import type { CallKind } from "@withu/shared-types";
 import { UserModel } from "../modules/users/user.model";
 import * as coupleService from "../modules/couples/couple.service";
 import { createNotification } from "../modules/notifications/notification.service";
+import { sendPushToUser } from "../modules/notifications/push.service";
 import { emitToUser } from "./emitter";
 import type { TypedSocket } from "./types";
 
@@ -49,6 +50,21 @@ export function registerCallHandlers(socket: TypedSocket) {
 
     const caller = await UserModel.findById(userId).select("name");
     if (!caller) return;
+
+    // A push alongside the socket event means the callee still hears about the call
+    // if the app is backgrounded or closed, not just once it's already been missed.
+    UserModel.findById(calleeId)
+      .select("pushTokens")
+      .then((callee) => {
+        if (callee?.pushTokens.length) {
+          sendPushToUser(calleeId, callee.pushTokens, {
+            title: `Incoming ${kind} call`,
+            body: `${caller.name} is calling you`,
+            data: { type: "incoming_call", callId, kind },
+          }).catch(() => undefined);
+        }
+      })
+      .catch(() => undefined);
 
     const call: ActiveCall = { callId, callerId: userId, calleeId, coupleId, kind, status: "ringing", ringTimeout: null };
     call.ringTimeout = setTimeout(() => {

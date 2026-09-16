@@ -43,7 +43,7 @@ export function PickerButton<T extends string>({
               className="flex-row items-center justify-between border-b border-border py-3.5"
             >
               <Text className="text-base text-foreground">{item.label}</Text>
-              {item.value === value && <Check size={18} color="#7A2C4C" />}
+              {item.value === value && <Check size={18} color="#276852" />}
             </Pressable>
           )}
         />

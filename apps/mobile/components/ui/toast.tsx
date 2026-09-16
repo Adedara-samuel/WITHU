@@ -23,10 +23,10 @@ export function useToast() {
 }
 
 const ACCENT: Record<ToastVariant, string> = {
-  default: "#7A2C4C",
+  default: "#276852",
   success: "#16A34A",
   error: "#C6402F",
-  love: "#D9704A",
+  love: "#C26447",
 };
 
 function ToastCard({ toast, onHide }: { toast: ToastItem; onHide: () => void }) {

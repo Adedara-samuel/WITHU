@@ -49,7 +49,7 @@ export default function OurSpaceScreen() {
             </Text>
           </View>
           <Pressable onPress={() => router.push("/settings")} hitSlop={10}>
-            <Settings size={22} color="#6B5D63" />
+            <Settings size={22} color="#63746E" />
           </Pressable>
         </View>
 
@@ -80,7 +80,7 @@ export default function OurSpaceScreen() {
                 className="items-center gap-2 rounded-2xl border border-border bg-card px-5 py-4"
                 style={{ minWidth: "28%" }}
               >
-                <a.Icon size={20} color="#7A2C4C" />
+                <a.Icon size={20} color="#276852" />
                 <Text className="text-xs font-sans-medium text-foreground">{a.label}</Text>
               </Pressable>
             ))}

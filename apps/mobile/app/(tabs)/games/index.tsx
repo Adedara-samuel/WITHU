@@ -59,7 +59,7 @@ export default function GamesScreen() {
         )}
 
         {isLoading ? (
-          <ActivityIndicator color="#7A2C4C" />
+          <ActivityIndicator color="#276852" />
         ) : (
           <>
             <View className="gap-3">

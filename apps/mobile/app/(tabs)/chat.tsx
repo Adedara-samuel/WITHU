@@ -64,7 +64,7 @@ export default function ChatScreen() {
                   hitSlop={8}
                   className="h-10 w-10 items-center justify-center rounded-full disabled:opacity-40"
                 >
-                  <Phone size={20} color="#221019" />
+                  <Phone size={20} color="#1A2320" />
                 </Pressable>
                 <Pressable
                   onPress={() => startCall("video")}
@@ -72,7 +72,7 @@ export default function ChatScreen() {
                   hitSlop={8}
                   className="h-10 w-10 items-center justify-center rounded-full disabled:opacity-40"
                 >
-                  <Video size={20} color="#221019" />
+                  <Video size={20} color="#1A2320" />
                 </Pressable>
               </View>
             </>
@@ -81,7 +81,7 @@ export default function ChatScreen() {
 
         {isLoading ? (
           <View className="flex-1 items-center justify-center">
-            <ActivityIndicator color="#7A2C4C" />
+            <ActivityIndicator color="#276852" />
           </View>
         ) : (
           <FlatList
@@ -107,7 +107,7 @@ export default function ChatScreen() {
               emitTyping();
             }}
             placeholder="Type a message..."
-            placeholderTextColor="#6B5D63"
+            placeholderTextColor="#63746E"
             className="h-11 flex-1 rounded-full border border-border bg-background px-4 text-base text-foreground"
           />
           <Pressable

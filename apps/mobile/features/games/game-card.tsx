@@ -32,7 +32,7 @@ export function GameCard({ game, onPlay, pending }: { game: GameDefinition; onPl
     <Card className="flex-1" style={{ minWidth: "46%" }}>
       <CardContent className="gap-3">
         <View className="h-9 w-9 items-center justify-center rounded-full bg-primary/10">
-          <Icon size={18} color="#7A2C4C" />
+          <Icon size={18} color="#276852" />
         </View>
         <View>
           <Text className="font-display text-base text-foreground">{game.name}</Text>

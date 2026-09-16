@@ -70,3 +70,13 @@ export const updatePreferencesSchema = z.object({
     .optional(),
 });
 export type UpdatePreferencesInput = z.infer<typeof updatePreferencesSchema>;
+
+export const registerPushTokenSchema = z.object({
+  token: z.string().trim().min(10),
+});
+export type RegisterPushTokenInput = z.infer<typeof registerPushTokenSchema>;
+
+export const removePushTokenSchema = z.object({
+  token: z.string().trim().min(10),
+});
+export type RemovePushTokenInput = z.infer<typeof removePushTokenSchema>;

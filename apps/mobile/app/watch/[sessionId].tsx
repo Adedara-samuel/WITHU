@@ -24,7 +24,7 @@ export default function WatchSessionScreen() {
   if (isLoading || !session) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator color="#7A2C4C" />
+        <ActivityIndicator color="#276852" />
       </View>
     );
   }
@@ -41,7 +41,7 @@ export default function WatchSessionScreen() {
             }}
             className="flex-row items-center gap-1 rounded-full border border-border px-3 py-1.5"
           >
-            <LogOut size={14} color="#221019" />
+            <LogOut size={14} color="#1A2320" />
             <Text className="text-xs font-sans-medium text-foreground">End</Text>
           </Pressable>
         </View>

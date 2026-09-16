@@ -44,7 +44,7 @@ export function AudioSyncPlayer({ session, onPlay, onPause }: Props) {
   return (
     <View className="items-center gap-4 rounded-2xl border border-border bg-card p-8">
       <View className="h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-        <Music size={32} color="#7A2C4C" />
+        <Music size={32} color="#276852" />
       </View>
       <View className="items-center">
         <Text className="font-display text-lg text-foreground">{session.track.title}</Text>

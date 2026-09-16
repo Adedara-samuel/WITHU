@@ -33,3 +33,13 @@ export async function handleUpdatePreferences(req: Request, res: Response) {
   const user = await service.updatePreferences(req.userId!, req.body);
   return ok(res, toAuthenticatedUser(user));
 }
+
+export async function handleRegisterPushToken(req: Request, res: Response) {
+  await service.registerPushToken(req.userId!, req.body.token);
+  return ok(res, { registered: true });
+}
+
+export async function handleRemovePushToken(req: Request, res: Response) {
+  await service.removePushToken(req.userId!, req.body.token);
+  return ok(res, { removed: true });
+}

@@ -8,4 +8,8 @@ export const profileApi = {
   setStatus: (input: SetStatusInput) => apiFetch<AuthenticatedUser>("/api/users/me/status", { method: "POST", body: input }),
   updatePreferences: (input: UpdatePreferencesInput) =>
     apiFetch<AuthenticatedUser>("/api/users/me/preferences", { method: "PATCH", body: input }),
+  registerPushToken: (token: string) =>
+    apiFetch<{ registered: boolean }>("/api/users/me/push-token", { method: "POST", body: { token } }),
+  removePushToken: (token: string) =>
+    apiFetch<{ removed: boolean }>("/api/users/me/push-token/remove", { method: "POST", body: { token } }),
 };

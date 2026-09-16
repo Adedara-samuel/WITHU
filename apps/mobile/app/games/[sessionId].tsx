@@ -31,7 +31,7 @@ export default function GameSessionScreen() {
   if (isLoading || !session || !user) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator color="#7A2C4C" />
+        <ActivityIndicator color="#276852" />
       </View>
     );
   }
@@ -45,7 +45,7 @@ export default function GameSessionScreen() {
         <View className="flex-row items-center justify-between">
           <Text className="font-display text-xl capitalize text-foreground">{session.gameKey.replace(/_/g, " ")}</Text>
           <Pressable onPress={() => router.back()} hitSlop={10}>
-            <X size={20} color="#6B5D63" />
+            <X size={20} color="#63746E" />
           </Pressable>
         </View>
 
@@ -85,7 +85,7 @@ export default function GameSessionScreen() {
 
         {session.status === "completed" && (
           <View className="items-center gap-2 rounded-2xl border border-border bg-card p-6">
-            <PartyPopper size={22} color="#D9704A" />
+            <PartyPopper size={22} color="#C26447" />
             <Text className="font-display text-lg text-foreground">
               {session.isDraw ? "It's a draw!" : winnerName ? `${winnerName} wins!` : "Round complete"}
             </Text>

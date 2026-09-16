@@ -15,6 +15,9 @@ export interface UserDoc {
   coupleId: Types.ObjectId | null;
   lastSeen: Date | null;
   socketPresence: PresenceState;
+  /** Expo push tokens for this user's devices - a user may be logged in on more
+   * than one phone, so this is a set rather than a single value. */
+  pushTokens: string[];
   tokenVersion: number;
   passwordResetTokenHash: string | null;
   passwordResetExpiresAt: Date | null;
@@ -59,6 +62,7 @@ const userSchema = new Schema<UserDoc>(
     coupleId: { type: Schema.Types.ObjectId, ref: "Couple", default: null, index: true },
     lastSeen: { type: Date, default: null },
     socketPresence: { type: String, default: "offline" },
+    pushTokens: { type: [String], default: [] },
     tokenVersion: { type: Number, default: 0 },
     passwordResetTokenHash: { type: String, default: null, select: false },
     passwordResetExpiresAt: { type: Date, default: null },
