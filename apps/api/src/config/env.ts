@@ -33,5 +33,6 @@ export const env = {
     process.env.WEB_URL ?? "http://localhost:3000",
     "http://localhost:8081", // Expo dev server
     "exp://localhost:8081",
+    ...(process.env.EXTRA_CORS_ORIGINS?.split(",").map((o) => o.trim()).filter(Boolean) ?? []),
   ],
 };

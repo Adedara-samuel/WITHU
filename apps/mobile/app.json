@@ -18,7 +18,8 @@
       "infoPlist": {
         "NSCameraUsageDescription": "WITHU needs camera access for video calls with your partner.",
         "NSMicrophoneUsageDescription": "WITHU needs microphone access for audio and video calls with your partner."
-      }
+      },
+      "bitcode": false
     },
     "android": {
       "adaptiveIcon": {
@@ -26,7 +27,19 @@
         "backgroundColor": "#0d1710"
       },
       "package": "app.withu.mobile",
-      "permissions": ["CAMERA", "RECORD_AUDIO", "MODIFY_AUDIO_SETTINGS"]
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "MODIFY_AUDIO_SETTINGS",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.CAMERA",
+        "android.permission.INTERNET",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.WAKE_LOCK",
+        "android.permission.BLUETOOTH"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -49,7 +62,12 @@
       ]
     ],
     "extra": {
-      "apiUrl": "http://localhost:4000"
-    }
+      "apiUrl": "http://localhost:4000",
+      "router": {},
+      "eas": {
+        "projectId": "538a6b17-b154-47c0-9cea-8b1f8c2208b3"
+      }
+    },
+    "owner": "sapok"
   }
 }
