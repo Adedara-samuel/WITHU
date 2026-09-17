@@ -15,14 +15,14 @@ import { ApiError } from "@/lib/api-client";
 export default function LoginPage() {
   const router = useRouter();
   const login = useLogin();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    const parsed = loginSchema.safeParse({ email, password });
+    const parsed = loginSchema.safeParse({ identifier, password });
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message ?? "Please check your details");
       return;
@@ -45,8 +45,15 @@ export default function LoginPage() {
 
       <form onSubmit={onSubmit} className="mt-8 space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
+          <Label htmlFor="identifier">Email or username</Label>
+          <Input
+            id="identifier"
+            autoComplete="username"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            placeholder="you@example.com or username"
+            required
+          />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="password">Password</Label>
@@ -74,11 +81,6 @@ export default function LoginPage() {
           Create your space
         </Link>
       </p>
-
-      <div className="mt-8 rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">
-        Demo accounts (after running the seed script): <br />
-        samuel@withu.app / eniobanke@withu.app — password123
-      </div>
     </div>
   );
 }

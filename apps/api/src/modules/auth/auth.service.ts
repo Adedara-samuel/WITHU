@@ -37,11 +37,13 @@ export async function register(input: RegisterInput) {
 }
 
 export async function login(input: LoginInput) {
-  const user = await UserModel.findOne({ email: input.email }).select("+passwordHash");
-  if (!user) throw AppError.unauthorized("Incorrect email or password");
+  const user = await UserModel.findOne({
+    $or: [{ email: input.identifier }, { username: input.identifier }],
+  }).select("+passwordHash");
+  if (!user) throw AppError.unauthorized("Incorrect email/username or password");
 
   const valid = await bcrypt.compare(input.password, user.passwordHash);
-  if (!valid) throw AppError.unauthorized("Incorrect email or password");
+  if (!valid) throw AppError.unauthorized("Incorrect email/username or password");
 
   user.lastSeen = new Date();
   await user.save();

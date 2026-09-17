@@ -35,14 +35,24 @@ describe("auth", () => {
 
     const good = await request(app)
       .post("/api/auth/login")
-      .send({ email: validUser.email, password: validUser.password });
+      .send({ identifier: validUser.email, password: validUser.password });
     expect(good.status).toBe(200);
     expect(good.body.data.user.username).toBe("samuel");
 
     const bad = await request(app)
       .post("/api/auth/login")
-      .send({ email: validUser.email, password: "wrong-password" });
+      .send({ identifier: validUser.email, password: "wrong-password" });
     expect(bad.status).toBe(401);
+  });
+
+  it("logs in with a username instead of an email", async () => {
+    await request(app).post("/api/auth/register").send(validUser);
+
+    const res = await request(app)
+      .post("/api/auth/login")
+      .send({ identifier: validUser.username, password: validUser.password });
+    expect(res.status).toBe(200);
+    expect(res.body.data.user.email).toBe(validUser.email);
   });
 
   it("refreshes tokens and can log out to invalidate the old refresh token", async () => {

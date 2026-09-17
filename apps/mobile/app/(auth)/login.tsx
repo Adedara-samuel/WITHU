@@ -9,13 +9,13 @@ import { ApiError } from "@/lib/api-client";
 
 export default function LoginScreen() {
   const login = useLogin();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const onSubmit = async () => {
     setError(null);
-    const parsed = loginSchema.safeParse({ email, password });
+    const parsed = loginSchema.safeParse({ identifier, password });
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message ?? "Please check your details");
       return;
@@ -42,7 +42,7 @@ export default function LoginScreen() {
         <Text className="mb-6 text-sm text-muted-foreground">Your space is right where you left it.</Text>
 
         <View className="gap-4">
-          <Input placeholder="Email" autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} />
+          <Input placeholder="Email or username" autoCapitalize="none" value={identifier} onChangeText={setIdentifier} />
           <PasswordInput placeholder="Password" value={password} onChangeText={setPassword} />
           {error && <Text className="text-sm text-destructive">{error}</Text>}
           <Button size="lg" onPress={onSubmit} loading={login.isPending}>
@@ -55,12 +55,6 @@ export default function LoginScreen() {
           <Link href="/register">
             <Text className="text-sm font-sans-medium text-primary">Create your space</Text>
           </Link>
-        </View>
-
-        <View className="mt-8 rounded-xl border border-dashed border-border p-3">
-          <Text className="text-xs text-muted-foreground">
-            Demo accounts (after running the seed script): samuel@withu.app / eniobanke@withu.app — password123
-          </Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
