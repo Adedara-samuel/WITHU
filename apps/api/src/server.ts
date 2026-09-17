@@ -4,6 +4,18 @@ import { createSocketServer } from "./sockets";
 import { connectDatabase } from "./database/connect";
 import { env } from "./config/env";
 
+// Socket.IO event handlers (unlike HTTP routes, which go through asyncHandler) have no
+// built-in error boundary - one bad/malformed event throwing was enough to crash the
+// whole process for both people in the couple. Log and keep running instead.
+process.on("unhandledRejection", (err) => {
+  // eslint-disable-next-line no-console
+  console.error("[api] Unhandled rejection (recovered)", err);
+});
+process.on("uncaughtException", (err) => {
+  // eslint-disable-next-line no-console
+  console.error("[api] Uncaught exception (recovered)", err);
+});
+
 async function main() {
   await connectDatabase();
 

@@ -88,6 +88,10 @@ export async function removeReaction(coupleId: string, messageId: string, userId
 }
 
 export async function markReadUpTo(coupleId: string, userId: string, messageId: string) {
+  // messageId can be a client-generated optimistic id (e.g. "temp-...") for a message
+  // that hasn't been acked by the server yet - that's not a real ObjectId, so there's
+  // nothing to mark read yet.
+  if (!Types.ObjectId.isValid(messageId)) return;
   await MessageModel.updateMany(
     { coupleId, _id: { $lte: messageId }, senderId: { $ne: userId }, status: { $ne: "read" } },
     { status: "read" }
