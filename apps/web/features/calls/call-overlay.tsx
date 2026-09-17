@@ -11,7 +11,16 @@ import { useCall } from "./call-context";
 function VideoTile({ stream, muted, mirrored }: { stream: MediaStream | null; muted?: boolean; mirrored?: boolean }) {
   const ref = useRef<HTMLVideoElement>(null);
   useEffect(() => {
-    if (ref.current) ref.current.srcObject = stream;
+    const el = ref.current;
+    if (!el) return;
+    el.srcObject = stream;
+    // The `autoPlay` attribute alone can silently fail once a stream is attached
+    // asynchronously (well after the click that started the call) - browsers can
+    // treat that as no longer tied to a user gesture and block playback.
+    el.play().catch(() => undefined);
+    return () => {
+      el.srcObject = null;
+    };
   }, [stream]);
   return (
     <video
@@ -22,6 +31,20 @@ function VideoTile({ stream, muted, mirrored }: { stream: MediaStream | null; mu
       className={mirrored ? "h-full w-full scale-x-[-1] object-cover" : "h-full w-full object-cover"}
     />
   );
+}
+
+function RemoteAudio({ stream }: { stream: MediaStream | null }) {
+  const ref = useRef<HTMLAudioElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.srcObject = stream;
+    el.play().catch(() => undefined);
+    return () => {
+      el.srcObject = null;
+    };
+  }, [stream]);
+  return <audio ref={ref} autoPlay />;
 }
 
 function CallTimer({ startedAt }: { startedAt: number | null }) {
@@ -76,6 +99,7 @@ export function CallOverlay() {
           </div>
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center gap-4">
+            {!isVideo && <RemoteAudio stream={state.remoteStream} />}
             <motion.div
               animate={state.phase === "outgoing" || state.phase === "incoming" ? { scale: [1, 1.06, 1] } : {}}
               transition={{ repeat: Infinity, duration: 1.6 }}

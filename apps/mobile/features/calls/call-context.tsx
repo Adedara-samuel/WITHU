@@ -6,6 +6,7 @@ import {
   RTCPeerConnection,
   RTCSessionDescription,
 } from "react-native-webrtc";
+import InCallManager from "react-native-incall-manager";
 import type { CallEndReason, CallKind, PlainIceCandidate } from "@withu/shared-types";
 import { useAppSocket } from "@/providers/socket-provider";
 import { useMyCouple } from "@/features/couple/hooks";
@@ -90,12 +91,19 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
   const cleanup = useCallback(() => {
     const session = sessionRef.current;
-    if (session) {
-      session.pc.close();
-      session.localStream.getTracks().forEach((t) => t.stop());
-    }
     sessionRef.current = null;
-    setState(IDLE_STATE);
+    // However teardown goes, the UI must always return to idle - an exception here
+    // (e.g. closing an already-errored peer connection) used to leave the call stuck
+    // open with no way to end it.
+    try {
+      session?.pc.close();
+      session?.localStream.getTracks().forEach((t) => t.stop());
+      InCallManager.stop();
+    } catch (err) {
+      console.error("Error tearing down call", err);
+    } finally {
+      setState(IDLE_STATE);
+    }
   }, []);
 
   const createPeerConnection = useCallback(
@@ -147,6 +155,10 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
       const callId = newCallId();
       try {
         const localStream = (await mediaDevices.getUserMedia({ audio: true, video: kind === "video" })) as MediaStream;
+        // Without this, react-native-webrtc audio can end up routed to the earpiece at
+        // near-silent volume instead of the speaker, which just looks like "no audio".
+        InCallManager.start({ media: kind });
+        InCallManager.setForceSpeakerphoneOn(kind === "video");
         const pc = createPeerConnection(callId);
         localStream.getTracks().forEach((track) => pc.addTrack(track, localStream));
 
@@ -173,6 +185,8 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
       try {
         const localStream = (await mediaDevices.getUserMedia({ audio: true, video: session.kind === "video" })) as MediaStream;
+        InCallManager.start({ media: session.kind });
+        InCallManager.setForceSpeakerphoneOn(session.kind === "video");
         localStream.getTracks().forEach((track) => session.pc.addTrack(track, localStream));
         session.localStream = localStream;
         setState((prev) => ({ ...prev, phase: "connecting", localStream }));
@@ -188,8 +202,11 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
   const endCall = useCallback(() => {
     const session = sessionRef.current;
-    if (socket && session) socket.emit("CALL_END", { callId: session.callId });
-    cleanup();
+    try {
+      if (socket && session) socket.emit("CALL_END", { callId: session.callId });
+    } finally {
+      cleanup();
+    }
   }, [socket, cleanup]);
 
   const toggleMic = useCallback(() => {

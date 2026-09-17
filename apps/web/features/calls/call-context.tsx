@@ -85,12 +85,18 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
   const cleanup = useCallback(() => {
     const session = sessionRef.current;
-    if (session) {
-      session.pc.close();
-      session.localStream.getTracks().forEach((t) => t.stop());
-    }
     sessionRef.current = null;
-    setState(IDLE_STATE);
+    // However teardown goes, the UI must always return to idle - an exception here
+    // (e.g. closing an already-errored peer connection) used to leave the call stuck
+    // open with no way to end it.
+    try {
+      session?.pc.close();
+      session?.localStream.getTracks().forEach((t) => t.stop());
+    } catch (err) {
+      console.error("Error tearing down call", err);
+    } finally {
+      setState(IDLE_STATE);
+    }
   }, []);
 
   const createPeerConnection = useCallback(
@@ -169,8 +175,11 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
   const endCall = useCallback(() => {
     const session = sessionRef.current;
-    if (socket && session) socket.emit("CALL_END", { callId: session.callId });
-    cleanup();
+    try {
+      if (socket && session) socket.emit("CALL_END", { callId: session.callId });
+    } finally {
+      cleanup();
+    }
   }, [socket, cleanup]);
 
   const toggleMic = useCallback(() => {
