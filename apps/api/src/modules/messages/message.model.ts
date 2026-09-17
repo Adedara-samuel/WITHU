@@ -25,6 +25,9 @@ export interface MessageDoc {
   replyToId: Types.ObjectId | null;
   reactions: MessageReactionDoc[];
   status: MessageStatus;
+  /** Client-generated id from the optimistic send. Lets a retried send on a flaky
+   * connection return the original message instead of creating a duplicate. */
+  clientTempId: string | null;
   editedAt: Date | null;
   deletedAt: Date | null;
   createdAt: Date;
@@ -62,6 +65,7 @@ const messageSchema = new Schema<MessageDoc>(
     replyToId: { type: Schema.Types.ObjectId, ref: "Message", default: null },
     reactions: { type: [reactionSchema], default: [] },
     status: { type: String, default: "sent" },
+    clientTempId: { type: String, default: null },
     editedAt: { type: Date, default: null },
     deletedAt: { type: Date, default: null },
   },
@@ -70,5 +74,7 @@ const messageSchema = new Schema<MessageDoc>(
 
 messageSchema.index({ coupleId: 1, _id: -1 });
 messageSchema.index({ coupleId: 1, text: "text" });
+// Sparse: most historical messages predate this field, and not every send provides one.
+messageSchema.index({ coupleId: 1, clientTempId: 1 }, { unique: true, sparse: true });
 
 export const MessageModel = model<MessageDoc>("Message", messageSchema);

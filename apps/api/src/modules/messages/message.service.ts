@@ -12,15 +12,31 @@ export async function sendMessage(coupleId: string, senderId: string, input: Sen
     throw AppError.badRequest("This message type needs an attachment.");
   }
 
-  return MessageModel.create({
-    coupleId,
-    senderId,
-    type: input.type,
-    text: input.text ?? null,
-    attachment: input.attachment ?? null,
-    replyToId: input.replyToId ?? null,
-    status: "sent",
-  });
+  try {
+    return await MessageModel.create({
+      coupleId,
+      senderId,
+      type: input.type,
+      text: input.text ?? null,
+      attachment: input.attachment ?? null,
+      replyToId: input.replyToId ?? null,
+      status: "sent",
+      clientTempId: input.clientTempId ?? null,
+    });
+  } catch (err) {
+    // A dropped response on a flaky connection can make the client retry a send that
+    // actually went through - the unique (coupleId, clientTempId) index turns that
+    // retry into a safe no-op that returns the original message instead of a duplicate.
+    if (input.clientTempId && isDuplicateKeyError(err)) {
+      const existing = await MessageModel.findOne({ coupleId, clientTempId: input.clientTempId });
+      if (existing) return existing;
+    }
+    throw err;
+  }
+}
+
+function isDuplicateKeyError(err: unknown): boolean {
+  return typeof err === "object" && err !== null && "code" in err && (err as { code?: number }).code === 11000;
 }
 
 export async function listMessages(coupleId: string, cursor?: string, limit = 30) {

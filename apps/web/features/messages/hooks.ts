@@ -41,6 +41,10 @@ export function useSendMessage() {
 
   return useMutation({
     mutationFn: (input: SendMessageInput) => messagesApi.send(input),
+    // Safe to retry: the backend dedupes by clientTempId, so a retried send after a
+    // dropped response on a flaky connection can't create a duplicate message.
+    retry: 2,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 4000),
     onMutate: async (input) => {
       if (!user) return;
       const optimistic: Message = {
@@ -137,10 +141,17 @@ export function useMessagesRealtime(coupleId: string | undefined) {
     const upsert = (message: Message) => {
       queryClient.setQueryData<MessagesData>(messagesKey, (data) => {
         if (!data) return data;
-        const exists = data.pages.some((p) => p.messages.some((m) => m.id === message.id));
-        if (exists) return mapPages(data, (m) => (m.id === message.id ? message : m));
-        const [first, ...rest] = data.pages;
-        return { ...data, pages: [{ ...first, messages: [...first.messages, message] }, ...rest] };
+        // If this is our own optimistic send landing back over the socket (e.g. its
+        // REST response was lost on a flaky connection), drop the temp bubble too -
+        // otherwise it lingers as a visible duplicate until the retry resolves.
+        const withoutTemp =
+          message.clientTempId !== undefined
+            ? removeFromPages(data, (m) => m.clientTempId === message.clientTempId && m.id !== message.id)
+            : data;
+        const exists = withoutTemp!.pages.some((p) => p.messages.some((m) => m.id === message.id));
+        if (exists) return mapPages(withoutTemp, (m) => (m.id === message.id ? message : m));
+        const [first, ...rest] = withoutTemp!.pages;
+        return { ...withoutTemp!, pages: [{ ...first, messages: [...first.messages, message] }, ...rest] };
       });
     };
 

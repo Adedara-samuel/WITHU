@@ -63,10 +63,13 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (token && !skipAuth) headers.Authorization = `Bearer ${token}`;
 
+    // On a poor connection a hung request can otherwise sit forever with no error and
+    // no retry - fail fast so the UI (and TanStack Query's retry) can react.
     return fetch(buildUrl(path, query), {
       method,
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
+      signal: AbortSignal.timeout(15_000),
     });
   };
 

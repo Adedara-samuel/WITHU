@@ -5,7 +5,15 @@
       "Bash(curl -s --path-as-is -o /tmp/bundle-android.js -w \"Android bundle: HTTP_STATUS:%{http_code} SIZE:%{size_download}\\\\n\" \"http://localhost:8085/node_modules/expo-router/entry.bundle?platform=android&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.bytecode=true&transform.routerRoot=app\" --max-time 180)",
       "Bash(rm -f /tmp/expo-video-install.log)",
       "Bash(npx expo *)",
-      "Bash(echo \"INSTALL_EXIT:$?\")"
+      "Bash(echo \"INSTALL_EXIT:$?\")",
+      "Bash(EXPO_TOKEN=\"BV_N02nsYN-2Wv4orbjJEYtXLqJ-ghqSvWnmug1f\" npx --yes eas-cli build:view bd8ac614-3844-4cee-9471-d21c2be8187e --json)",
+      "Bash(curl -s https://withu-api.onrender.com/health -w \"\\\\nHTTP %{http_code}\\\\n\")",
+      "Bash(curl -s -X POST https://withu-api.onrender.com/api/auth/register -H 'Content-Type: application/json' -d '{\"name\":\"Verify Bot 2\",\"username\":\"verifybot2\",\"email\":\"verifybot2@withu.app\",\"password\":\"password123\"}' -w '\\\\nHTTP %{http_code}\\\\n' -o /tmp/reg2.json)",
+      "Bash(curl -s -X POST https://withu-api.onrender.com/api/auth/login -H 'Content-Type: application/json' -d '{\"identifier\":\"verifybot2@withu.app\",\"password\":\"password123\"}' -w '\\\\nHTTP %{http_code}\\\\n' -o /dev/null)",
+      "Bash(curl -s -X POST https://withu-api.onrender.com/api/auth/login -H 'Content-Type: application/json' -d '{\"identifier\":\"verifybot2\",\"password\":\"password123\"}' -w '\\\\nHTTP %{http_code}\\\\n' -o /dev/null)",
+      "Bash(curl -s -X POST https://withu-api.onrender.com/api/auth/login -H 'Content-Type: application/json' -d '{\"identifier\":\"verifybot2\",\"password\":\"wrongpass\"}' -w '\\\\nHTTP %{http_code}\\\\n' -o /dev/null)",
+      "Bash(curl -s https://withu-web-seven.vercel.app/login)",
+      "Bash(EXPO_TOKEN=\"BV_N02nsYN-2Wv4orbjJEYtXLqJ-ghqSvWnmug1f\" npx --yes eas-cli build:view 166a6da6-7726-48ab-bd2c-89badaae65e6 --json)"
     ]
   }
 }

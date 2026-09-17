@@ -12,6 +12,7 @@ export function toMessage(m: MessageHydrated): Message {
     replyToId: m.replyToId ? m.replyToId.toString() : null,
     reactions: m.reactions.map((r) => ({ emoji: r.emoji, userId: r.userId.toString() })),
     status: m.status,
+    clientTempId: m.clientTempId ?? undefined,
     editedAt: m.editedAt?.toISOString() ?? null,
     deletedAt: m.deletedAt?.toISOString() ?? null,
     createdAt: m.createdAt.toISOString(),
