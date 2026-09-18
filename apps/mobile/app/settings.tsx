@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { Alert, Pressable, ScrollView, Switch, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -13,6 +13,8 @@ import { useLogout } from "@/features/auth/hooks";
 import { useCancelLeaveRequest, useMyCouple, useRequestLeaveCouple, useUpdateCouple } from "@/features/couple/hooks";
 import { useUpdatePreferences, useUpdateProfile } from "@/features/profile/hooks";
 import { useAuthStore } from "@/stores/auth-store";
+import { biometricLabel, getBiometricAvailability } from "@/lib/biometrics";
+import { cn } from "@/lib/cn";
 
 function LeaveRelationshipControl({
   couple,
@@ -98,20 +100,36 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function Row({ label, description, value, onChange }: { label: string; description?: string; value: boolean; onChange: (v: boolean) => void }) {
+function Row({
+  label,
+  description,
+  value,
+  onChange,
+  disabled,
+}: {
+  label: string;
+  description?: string;
+  value: boolean;
+  onChange: (v: boolean) => void;
+  disabled?: boolean;
+}) {
   return (
-    <View className="flex-row items-center justify-between">
+    <View className={cn("flex-row items-center justify-between", disabled && "opacity-50")}>
       <View className="flex-1 pr-3">
         <Text className="text-sm text-foreground">{label}</Text>
         {description && <Text className="text-xs text-muted-foreground">{description}</Text>}
       </View>
-      <Switch value={value} onValueChange={onChange} trackColor={{ true: "#276852" }} />
+      <Switch value={value} onValueChange={onChange} trackColor={{ true: "#276852" }} disabled={disabled} />
     </View>
   );
 }
 
 export default function SettingsScreen() {
   const user = useAuthStore((s) => s.user);
+  const stayLoggedIn = useAuthStore((s) => s.stayLoggedIn);
+  const setStayLoggedIn = useAuthStore((s) => s.setStayLoggedIn);
+  const biometricLockEnabled = useAuthStore((s) => s.biometricLockEnabled);
+  const setBiometricLockEnabled = useAuthStore((s) => s.setBiometricLockEnabled);
   const { data: couple } = useMyCouple();
   const updateProfile = useUpdateProfile();
   const updateCouple = useUpdateCouple();
@@ -122,6 +140,13 @@ export default function SettingsScreen() {
 
   const [name, setName] = useState(user?.name ?? "");
   const [bio, setBio] = useState(user?.bio ?? "");
+  const [biometrics, setBiometrics] = useState<{ available: boolean; label: string } | null>(null);
+
+  useEffect(() => {
+    getBiometricAvailability().then(({ available, types }) => {
+      setBiometrics({ available, label: biometricLabel(types) });
+    });
+  }, []);
 
   if (!user) return null;
   const prefs = user.preferences;
@@ -177,6 +202,26 @@ export default function SettingsScreen() {
             />
           </Section>
         )}
+
+        <Section title="Security">
+          <Row
+            label="Stay signed in"
+            description="Keep your session open until you log out, even after closing the app"
+            value={stayLoggedIn}
+            onChange={setStayLoggedIn}
+          />
+          <Row
+            label={biometrics?.label ?? "Face unlock or fingerprint"}
+            description={
+              biometrics && !biometrics.available
+                ? "Set up Face ID or a fingerprint in your phone's settings to use this"
+                : "Require it to open WITHU, even while signed in"
+            }
+            value={biometricLockEnabled}
+            onChange={setBiometricLockEnabled}
+            disabled={!biometrics?.available}
+          />
+        </Section>
 
         <Section title="Notifications">
           {(

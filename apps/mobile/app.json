@@ -17,7 +17,8 @@
       "bundleIdentifier": "app.withu.mobile",
       "infoPlist": {
         "NSCameraUsageDescription": "WITHU needs camera access for video calls with your partner.",
-        "NSMicrophoneUsageDescription": "WITHU needs microphone access for audio and video calls with your partner."
+        "NSMicrophoneUsageDescription": "WITHU needs microphone access for audio and video calls with your partner.",
+        "NSFaceIDUsageDescription": "WITHU uses Face ID to keep your shared space locked when you're not using it."
       },
       "bitcode": false
     },
@@ -58,6 +59,12 @@
         "expo-notifications",
         {
           "color": "#276852"
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "WITHU uses Face ID to keep your shared space locked when you're not using it."
         }
       ]
     ],

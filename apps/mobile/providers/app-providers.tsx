@@ -6,6 +6,7 @@ import { ToastProvider } from "@/components/ui/toast";
 import { CallProvider } from "@/features/calls/call-context";
 import { CallOverlay } from "@/features/calls/call-overlay";
 import { PushNotificationProvider } from "@/features/notifications/push-provider";
+import { BiometricLockGate } from "@/features/auth/biometric-lock-gate";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(createQueryClient);
@@ -22,6 +23,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
           </PushNotificationProvider>
         </SocketProvider>
       </ToastProvider>
+      <BiometricLockGate />
     </QueryClientProvider>
   );
 }
