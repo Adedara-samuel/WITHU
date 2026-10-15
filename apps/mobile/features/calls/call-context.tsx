@@ -48,6 +48,9 @@ interface CallUiState {
   micMuted: boolean;
   cameraOff: boolean;
   startedAt: number | null;
+  /** The peer connection dropped mid-call (network blip, app switch) and is trying
+   * to recover - distinct from the call actually having ended. */
+  reconnecting: boolean;
 }
 
 interface CallContextValue {
@@ -69,6 +72,7 @@ const IDLE_STATE: CallUiState = {
   micMuted: false,
   cameraOff: false,
   startedAt: null,
+  reconnecting: false,
 };
 
 const CallContext = createContext<CallContextValue | null>(null);
@@ -149,12 +153,36 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
       // @ts-expect-error - same as above
       pc.ontrack = (event) => {
         setState((prev) =>
-          prev.callId === callId ? { ...prev, phase: "active", remoteStream: event.streams[0] ?? null, startedAt: prev.startedAt ?? Date.now() } : prev
+          prev.callId === callId
+            ? { ...prev, phase: "active", remoteStream: event.streams[0] ?? null, startedAt: prev.startedAt ?? Date.now(), reconnecting: false }
+            : prev
         );
       };
+      // WhatsApp/Zoom-style resilience: a dropped network path ("disconnected") isn't
+      // treated as the call being over - only "failed"/"closed" are. A brief blip often
+      // self-heals; if it doesn't within a few seconds, the original caller actively
+      // renegotiates with an ICE restart rather than just waiting indefinitely.
       pc.onconnectionstatechange = () => {
-        if (pc.connectionState === "failed" || pc.connectionState === "closed") {
-          if (sessionRef.current?.callId === callId) cleanup();
+        if (sessionRef.current?.callId !== callId) return;
+
+        if (pc.connectionState === "connected") {
+          setState((prev) => (prev.callId === callId ? { ...prev, reconnecting: false } : prev));
+        } else if (pc.connectionState === "disconnected") {
+          setState((prev) => (prev.callId === callId ? { ...prev, reconnecting: true } : prev));
+          setTimeout(async () => {
+            const session = sessionRef.current;
+            if (!session || session.callId !== callId || session.pc.connectionState !== "disconnected") return;
+            if (session.role !== "caller") return; // only the offerer renegotiates, to avoid both sides racing
+            try {
+              const offer = await session.pc.createOffer({ iceRestart: true });
+              await session.pc.setLocalDescription(offer);
+              socket.emit("CALL_SIGNAL", { callId, signal: { type: "offer", sdp: offer.sdp ?? "" } });
+            } catch (err) {
+              console.error("ICE restart failed", err);
+            }
+          }, 4000);
+        } else if (pc.connectionState === "failed" || pc.connectionState === "closed") {
+          cleanup();
         }
       };
 

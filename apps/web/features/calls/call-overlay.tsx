@@ -69,6 +69,9 @@ export function CallOverlay() {
   if (state.phase === "idle") return null;
 
   const isVideo = state.kind === "video";
+  // Like Zoom/WhatsApp: see yourself on camera as soon as you dial or pick up a video
+  // call, not just once the other person has joined.
+  const showVideoLayout = isVideo && state.phase !== "incoming";
 
   return (
     <AnimatePresence>
@@ -78,14 +81,22 @@ export function CallOverlay() {
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-[200] flex flex-col bg-neutral-950 text-white"
       >
-        {isVideo && state.phase === "active" ? (
+        {showVideoLayout ? (
           <div className="relative flex-1">
-            {state.remoteStream ? (
+            {state.remoteStream && state.phase === "active" ? (
               <VideoTile stream={state.remoteStream} />
             ) : (
               <div className="flex h-full items-center justify-center">
                 <PartnerAvatar partner={partner} />
               </div>
+            )}
+            {(state.phase === "outgoing" || state.phase === "connecting") && (
+              <p className="absolute left-0 right-0 top-6 text-center text-sm text-white/70">
+                {state.phase === "outgoing" ? "Calling..." : "Connecting..."}
+              </p>
+            )}
+            {state.phase === "active" && state.reconnecting && (
+              <p className="absolute left-0 right-0 top-6 text-center text-sm text-amber-300">Reconnecting...</p>
             )}
             {state.localStream && !state.cameraOff && (
               <motion.div
@@ -108,11 +119,11 @@ export function CallOverlay() {
             </motion.div>
             <div className="text-center">
               <p className="text-lg font-medium">{state.partnerName}</p>
-              <p className="text-sm text-white/60">
+              <p className={state.phase === "active" && state.reconnecting ? "text-sm text-amber-300" : "text-sm text-white/60"}>
                 {state.phase === "incoming" && `Incoming ${state.kind} call...`}
                 {state.phase === "outgoing" && "Calling..."}
                 {state.phase === "connecting" && "Connecting..."}
-                {state.phase === "active" && <CallTimer startedAt={state.startedAt} />}
+                {state.phase === "active" && (state.reconnecting ? "Reconnecting..." : <CallTimer startedAt={state.startedAt} />)}
               </p>
             </div>
           </div>

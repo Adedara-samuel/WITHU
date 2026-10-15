@@ -61,6 +61,9 @@ export function CallOverlay() {
 
   const visible = state.phase !== "idle";
   const isVideo = state.kind === "video";
+  // Like Zoom/WhatsApp: see yourself on camera as soon as you dial or pick up a video
+  // call, not just once the other person has joined.
+  const showVideoLayout = isVideo && state.phase !== "incoming";
 
   useEffect(() => {
     if (state.phase !== "incoming") return;

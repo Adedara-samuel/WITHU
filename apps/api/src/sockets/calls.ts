@@ -34,6 +34,13 @@ function clearRingTimeout(call: ActiveCall) {
   call.ringTimeout = null;
 }
 
+function isUserInACall(userId: string): boolean {
+  for (const call of activeCalls.values()) {
+    if (call.callerId === userId || call.calleeId === userId) return true;
+  }
+  return false;
+}
+
 // Notifies both sides even though whoever triggered the end already knows locally -
 // keeping the client's CALL_ENDED handler idempotent is simpler than tracking who to skip.
 function endCall(callId: string, call: ActiveCall, reason: "ended" | "missed" | "failed") {
@@ -61,6 +68,13 @@ export function registerCallHandlers(socket: TypedSocket) {
     const calleeId = await coupleService.getPartnerId(coupleId, userId);
     if (!calleeId) {
       socket.emit("ERROR", { message: "You need a partner to call", code: "NO_PARTNER" });
+      return;
+    }
+
+    // Mirrors a real phone system: if they're already on a call, the caller gets an
+    // immediate busy signal instead of the callee's phone ringing on top of their call.
+    if (isUserInACall(calleeId) || isUserInACall(userId)) {
+      emitToUser(userId, "CALL_ENDED", { callId, reason: "busy" });
       return;
     }
 
