@@ -13,6 +13,7 @@ import { useMyCouple } from "@/features/couple/hooks";
 import { useAuthStore } from "@/stores/auth-store";
 import { useToast } from "@/components/ui/toast";
 import { apiFetch } from "@/lib/api-client";
+import { playCallTone, stopCallTone } from "@/lib/call-tones";
 
 // STUN alone can't traverse symmetric/carrier-grade NAT, which is common on mobile
 // data - that showed up as calls that "connect" but never actually carry audio or
@@ -106,6 +107,14 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   const partner = couple ? (couple.partnerOne.id === currentUserId ? couple.partnerTwo : couple.partnerOne) : null;
   const partnerRef = useRef(partner);
   partnerRef.current = partner;
+
+  // Dialing/ringing needs to be audible, not just a "Calling..." label on screen.
+  useEffect(() => {
+    if (state.phase === "outgoing") playCallTone("ringback");
+    else if (state.phase === "incoming") playCallTone("ringtone");
+    else stopCallTone();
+    return () => stopCallTone();
+  }, [state.phase]);
 
   const cleanup = useCallback(() => {
     const session = sessionRef.current;
