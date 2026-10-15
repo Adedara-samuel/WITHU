@@ -5,8 +5,14 @@ name: Keep API awake
 # back up. A periodic ping counts as traffic and resets that idle timer, so the API
 # stays warm and chat stays fast.
 on:
+  # Two offset schedules instead of one: GitHub doesn't guarantee when it actually runs
+  # a scheduled workflow (it can silently delay a cron trigger by hours on a quiet repo),
+  # and that delay isn't fully correlated between separate schedules - so if one trigger
+  # gets delayed, the other often still lands inside Render's 15-minute idle window.
+  # This narrows the gaps; it can't make GitHub's scheduler itself punctual.
   schedule:
     - cron: "*/10 * * * *"
+    - cron: "2-59/10 * * * *"
   workflow_dispatch: {}
 
 jobs:
