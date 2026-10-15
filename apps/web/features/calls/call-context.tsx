@@ -7,9 +7,28 @@ import { useMyCouple } from "@/features/couple/hooks";
 import { useAuthStore } from "@/stores/auth-store";
 import { useToast } from "@/components/ui/toast";
 
-// Public STUN only - there's no TURN relay in this deployment, so calls between
-// two devices behind restrictive/symmetric NATs may fail to connect peer-to-peer.
-const ICE_SERVERS: RTCIceServer[] = [{ urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] }];
+// STUN alone can't traverse symmetric/carrier-grade NAT, which is common on mobile
+// data - that showed up as calls that "connect" but never actually carry audio or
+// video. Open Relay Project's free TURN servers (public, static credentials, no
+// account needed) give the connection a relay fallback when a direct P2P path fails.
+const ICE_SERVERS: RTCIceServer[] = [
+  { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] },
+  {
+    urls: "turn:openrelay.metered.ca:80",
+    username: "openrelayproject",
+    credential: "openrelayproject",
+  },
+  {
+    urls: "turn:openrelay.metered.ca:443",
+    username: "openrelayproject",
+    credential: "openrelayproject",
+  },
+  {
+    urls: "turn:openrelay.metered.ca:443?transport=tcp",
+    username: "openrelayproject",
+    credential: "openrelayproject",
+  },
+];
 
 export type CallPhase = "idle" | "outgoing" | "incoming" | "connecting" | "active";
 

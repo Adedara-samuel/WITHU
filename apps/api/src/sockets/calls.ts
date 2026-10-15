@@ -7,6 +7,10 @@ import { emitToUser } from "./emitter";
 import type { TypedSocket } from "./types";
 
 const RING_TIMEOUT_MS = 45_000;
+// A backgrounded phone, a locked screen, or a brief network blip triggers a socket
+// disconnect in as little as 20s (the Socket.IO ping timeout) well before the person
+// actually left the call - give them a window to reconnect before hanging up on them.
+const DISCONNECT_GRACE_MS = 30_000;
 
 interface ActiveCall {
   callId: string;
@@ -21,6 +25,9 @@ interface ActiveCall {
 // Calls are ephemeral signaling, not a persisted resource - an in-memory table
 // for the process is enough, mirroring how presence/typing state is handled.
 const activeCalls = new Map<string, ActiveCall>();
+// Pending "end call" timers from a disconnect, keyed by `${callId}:${userId}`, so a
+// reconnect from that same user can cancel the hangup before it fires.
+const pendingDisconnectEnds = new Map<string, NodeJS.Timeout>();
 
 function clearRingTimeout(call: ActiveCall) {
   if (call.ringTimeout) clearTimeout(call.ringTimeout);
@@ -38,6 +45,15 @@ function endCall(callId: string, call: ActiveCall, reason: "ended" | "missed" | 
 
 export function registerCallHandlers(socket: TypedSocket) {
   const { userId, coupleId } = socket.data;
+
+  // This is a reconnect - cancel any pending hangup from a recent disconnect so an
+  // in-progress call survives a brief background/lock-screen/network blip.
+  for (const [key, timeout] of pendingDisconnectEnds) {
+    if (key.endsWith(`:${userId}`)) {
+      clearTimeout(timeout);
+      pendingDisconnectEnds.delete(key);
+    }
+  }
 
   socket.on("CALL_START", async ({ callId, kind }) => {
     if (!coupleId || activeCalls.has(callId)) return;
@@ -116,7 +132,14 @@ export function registerCallHandlers(socket: TypedSocket) {
   socket.on("disconnect", () => {
     for (const [callId, call] of activeCalls) {
       if (call.callerId !== userId && call.calleeId !== userId) continue;
-      endCall(callId, call, call.status === "ringing" ? "missed" : "failed");
+      const key = `${callId}:${userId}`;
+      const timeout = setTimeout(() => {
+        pendingDisconnectEnds.delete(key);
+        const current = activeCalls.get(callId);
+        if (!current) return;
+        endCall(callId, current, current.status === "ringing" ? "missed" : "failed");
+      }, DISCONNECT_GRACE_MS);
+      pendingDisconnectEnds.set(key, timeout);
     }
   });
 }

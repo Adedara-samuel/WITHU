@@ -4,7 +4,7 @@ import { env } from "../config/env";
 import { verifyAccessToken } from "../utils/jwt";
 import { UserModel } from "../modules/users/user.model";
 import { setIo } from "./emitter";
-import { markUserOffline, markUserOnline } from "./presence";
+import { markUserOnline, scheduleUserOffline } from "./presence";
 import { registerMoodHandlers, registerTypingHandlers } from "./mood";
 import { registerChatHandlers } from "./chat";
 import { registerAffectionHandlers } from "./affection";
@@ -60,7 +60,7 @@ export function createSocketServer(httpServer: HttpServer): TypedServer {
     });
 
     socket.on("disconnect", () => {
-      markUserOffline(userId, coupleId).catch(() => undefined);
+      scheduleUserOffline(userId, coupleId);
     });
   });
 
