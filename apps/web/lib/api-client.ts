@@ -21,21 +21,33 @@ async function performRefresh(): Promise<string | null> {
   const { refreshToken } = useAuthStore.getState();
   if (!refreshToken) return null;
 
-  const res = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refreshToken }),
-  });
-  const json = (await res.json()) as ApiResponse<{ user: unknown; tokens: { accessToken: string; refreshToken: string } }>;
+  // A session should only ever end because the user logged out or the refresh token
+  // was explicitly rejected (401) - not because the free-tier API was mid cold-start
+  // and returned a 502, or the network blipped. Anything else just fails this one
+  // attempt and leaves the stored session intact for the next try.
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken }),
+      signal: AbortSignal.timeout(15_000),
+    });
 
-  if (!res.ok || !json.success) {
-    useAuthStore.getState().clear();
+    if (res.status === 401) {
+      useAuthStore.getState().clear();
+      return null;
+    }
+    if (!res.ok) return null;
+
+    const json = (await res.json()) as ApiResponse<{ user: unknown; tokens: { accessToken: string; refreshToken: string } }>;
+    if (!json.success) return null;
+
+    useAuthStore.getState().setTokens(json.data.tokens);
+    useAuthStore.getState().setUser(json.data.user as never);
+    return json.data.tokens.accessToken;
+  } catch {
     return null;
   }
-
-  useAuthStore.getState().setTokens(json.data.tokens);
-  useAuthStore.getState().setUser(json.data.user as never);
-  return json.data.tokens.accessToken;
 }
 
 interface RequestOptions {

@@ -6,6 +6,7 @@ import { useAppSocket } from "@/providers/socket-provider";
 import { useMyCouple } from "@/features/couple/hooks";
 import { useAuthStore } from "@/stores/auth-store";
 import { useToast } from "@/components/ui/toast";
+import { showBrowserNotification } from "@/lib/browser-notifications";
 
 // STUN alone can't traverse symmetric/carrier-grade NAT, which is common on mobile
 // data - that showed up as calls that "connect" but never actually carry audio or
@@ -250,11 +251,12 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!socket) return;
 
-    const onIncoming = ({ callId, kind }: { callId: string; callerId: string; callerName: string; kind: CallKind }) => {
+    const onIncoming = ({ callId, kind, callerName }: { callId: string; callerId: string; callerName: string; kind: CallKind }) => {
       if (sessionRef.current) {
         socket.emit("CALL_RESPOND", { callId, accept: false });
         return;
       }
+      showBrowserNotification(`Incoming ${kind} call`, `${callerName} is calling you`);
       const pc = createPeerConnection(callId);
       sessionRef.current = {
         callId,

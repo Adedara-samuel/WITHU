@@ -76,14 +76,22 @@ export function CallOverlay() {
   return (
     <Modal visible={visible} animationType="fade" statusBarTranslucent onRequestClose={endCall}>
       <View className="flex-1 bg-black">
-        {isVideo && state.phase === "active" ? (
+        {showVideoLayout ? (
           <View className="flex-1">
-            {state.remoteStream ? (
+            {state.remoteStream && state.phase === "active" ? (
               <RTCView streamURL={state.remoteStream.toURL()} style={{ flex: 1 }} objectFit="cover" />
             ) : (
               <View className="flex-1 items-center justify-center">
                 <Avatar uri={partner?.avatarUrl} name={partner?.name ?? state.partnerName ?? "?"} size={96} />
               </View>
+            )}
+            {(state.phase === "outgoing" || state.phase === "connecting") && (
+              <Text className="absolute left-0 right-0 top-14 text-center text-sm text-white/70">
+                {state.phase === "outgoing" ? "Calling..." : "Connecting..."}
+              </Text>
+            )}
+            {state.phase === "active" && state.reconnecting && (
+              <Text className="absolute left-0 right-0 top-14 text-center text-sm text-amber-300">Reconnecting...</Text>
             )}
             {state.localStream && !state.cameraOff && (
               <View className="absolute right-4 top-12 h-40 w-28 overflow-hidden rounded-2xl border border-white/20">
@@ -100,7 +108,12 @@ export function CallOverlay() {
                 {state.phase === "incoming" && <Text className="text-sm text-white/60">Incoming {state.kind} call...</Text>}
                 {state.phase === "outgoing" && <Text className="text-sm text-white/60">Calling...</Text>}
                 {state.phase === "connecting" && <Text className="text-sm text-white/60">Connecting...</Text>}
-                {state.phase === "active" && <CallTimer startedAt={state.startedAt} />}
+                {state.phase === "active" &&
+                  (state.reconnecting ? (
+                    <Text className="text-sm text-amber-300">Reconnecting...</Text>
+                  ) : (
+                    <CallTimer startedAt={state.startedAt} />
+                  ))}
               </View>
             </View>
           </View>

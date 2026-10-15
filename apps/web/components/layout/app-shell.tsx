@@ -2,6 +2,7 @@ import { Sidebar } from "./sidebar";
 import { BottomNav } from "./bottom-nav";
 import { ConnectionBanner } from "./connection-banner";
 import { PageTransition } from "./page-transition";
+import { NotificationPermissionBanner } from "./notification-permission-banner";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -9,6 +10,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <ConnectionBanner />
+        <NotificationPermissionBanner />
         <main className="flex-1 overflow-y-auto pb-20 lg:pb-0">
           <PageTransition>{children}</PageTransition>
         </main>

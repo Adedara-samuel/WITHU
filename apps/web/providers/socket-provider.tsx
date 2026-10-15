@@ -6,6 +6,7 @@ import type { Couple } from "@withu/shared-types";
 import { useAuthStore } from "@/stores/auth-store";
 import { connectSocket, disconnectSocket, type AppSocket } from "@/lib/socket";
 import { coupleKey } from "@/features/couple/hooks";
+import { showBrowserNotification } from "@/lib/browser-notifications";
 
 type ConnectionState = "connected" | "connecting" | "disconnected";
 
@@ -68,8 +69,11 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
         return updatePartner(prev, userId, (p) => ({ ...p, status }));
       });
     });
-    socket.on("NOTIFICATION_RECEIVED", () => {
+    socket.on("NOTIFICATION_RECEIVED", ({ notification }) => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      // As long as the browser is open (even in another tab or minimized), a real OS
+      // notification means this isn't missed just because the WITHU tab isn't focused.
+      showBrowserNotification(notification.title, notification.body);
     });
     socket.on("COUPLE_LEAVE_REQUESTED", ({ requestedBy }) => {
       queryClient.setQueryData<Couple | null>(coupleKey, (prev) => {
