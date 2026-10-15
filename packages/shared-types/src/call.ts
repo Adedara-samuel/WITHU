@@ -13,3 +13,11 @@ export type CallSignal =
   | { type: "offer"; sdp: string }
   | { type: "answer"; sdp: string }
   | { type: "ice-candidate"; candidate: PlainIceCandidate };
+
+/** Platform-agnostic mirror of RTCIceServer, so the API can hand out TURN/STUN
+ * credentials without either client needing the DOM lib. */
+export interface IceServer {
+  urls: string | string[];
+  username?: string;
+  credential?: string;
+}

@@ -18,6 +18,7 @@ import togetherRoutes from "./modules/together/together.routes";
 import watchRoutes from "./modules/watch/watch.routes";
 import listenRoutes from "./modules/listen/listen.routes";
 import notificationRoutes from "./modules/notifications/notification.routes";
+import callRoutes from "./modules/calls/call.routes";
 
 export function createApp() {
   const app = express();
@@ -44,6 +45,7 @@ export function createApp() {
   app.use("/api/watch", watchRoutes);
   app.use("/api/listen", listenRoutes);
   app.use("/api/notifications", notificationRoutes);
+  app.use("/api/calls", callRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

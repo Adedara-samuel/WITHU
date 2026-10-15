@@ -7,34 +7,19 @@ import {
   RTCSessionDescription,
 } from "react-native-webrtc";
 import InCallManager from "react-native-incall-manager";
-import type { CallEndReason, CallKind, PlainIceCandidate } from "@withu/shared-types";
+import type { CallEndReason, CallKind, IceServer, PlainIceCandidate } from "@withu/shared-types";
 import { useAppSocket } from "@/providers/socket-provider";
 import { useMyCouple } from "@/features/couple/hooks";
 import { useAuthStore } from "@/stores/auth-store";
 import { useToast } from "@/components/ui/toast";
+import { apiFetch } from "@/lib/api-client";
 
 // STUN alone can't traverse symmetric/carrier-grade NAT, which is common on mobile
 // data - that showed up as calls that "connect" but never actually carry audio or
-// video. Open Relay Project's free TURN servers (public, static credentials, no
-// account needed) give the connection a relay fallback when a direct P2P path fails.
-const ICE_SERVERS = [
-  { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] },
-  {
-    urls: "turn:openrelay.metered.ca:80",
-    username: "openrelayproject",
-    credential: "openrelayproject",
-  },
-  {
-    urls: "turn:openrelay.metered.ca:443",
-    username: "openrelayproject",
-    credential: "openrelayproject",
-  },
-  {
-    urls: "turn:openrelay.metered.ca:443?transport=tcp",
-    username: "openrelayproject",
-    credential: "openrelayproject",
-  },
-];
+// video. The API hands out a TURN relay (Twilio, when configured) on top of this
+// fallback - fetched fresh below rather than hardcoded, since a hardcoded free TURN
+// host can (and did) go dark with no warning.
+const FALLBACK_ICE_SERVERS: IceServer[] = [{ urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] }];
 
 export type CallPhase = "idle" | "outgoing" | "incoming" | "connecting" | "active";
 
@@ -108,6 +93,16 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   const stateRef = useRef(state);
   stateRef.current = state;
 
+  const iceServersRef = useRef(FALLBACK_ICE_SERVERS);
+  useEffect(() => {
+    if (!currentUserId) return;
+    apiFetch<{ iceServers: IceServer[] }>("/api/calls/ice-servers")
+      .then(({ iceServers }) => {
+        if (iceServers.length > 0) iceServersRef.current = iceServers;
+      })
+      .catch(() => undefined);
+  }, [currentUserId]);
+
   const partner = couple ? (couple.partnerOne.id === currentUserId ? couple.partnerTwo : couple.partnerOne) : null;
   const partnerRef = useRef(partner);
   partnerRef.current = partner;
@@ -132,7 +127,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   const createPeerConnection = useCallback(
     (callId: string) => {
       if (!socket) throw new Error("Not connected");
-      const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+      const pc = new RTCPeerConnection({ iceServers: iceServersRef.current });
 
       // @ts-expect-error - react-native-webrtc's event typings lag behind the spec slightly
       pc.onicecandidate = (event) => {

@@ -28,6 +28,13 @@ export const env = {
   webUrl: process.env.WEB_URL ?? "http://localhost:3000",
   mobileAppScheme: process.env.MOBILE_APP_SCHEME ?? "withu",
 
+  // Both optional - when unset, call ICE config falls back to STUN-only (works on
+  // same-network calls, fails across most real-world NATs). Get these from the
+  // Twilio Console after creating a free account; Network Traversal Service needs
+  // no separate activation.
+  twilioAccountSid: process.env.TWILIO_ACCOUNT_SID ?? null,
+  twilioAuthToken: process.env.TWILIO_AUTH_TOKEN ?? null,
+
   corsOrigins: [
     process.env.CLIENT_URL ?? "http://localhost:3000",
     process.env.WEB_URL ?? "http://localhost:3000",
